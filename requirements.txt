@@ -1,5 +1,4 @@
 Celery
-pymongo
 python-dateutil
 redis
 requests
