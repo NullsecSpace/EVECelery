@@ -1,6 +1,7 @@
 from celery import Celery
 import os
-from celeryconfig import task_routes
+from ESIRabbit.celeryconfig import task_routes
+from ESIRabbit.tasks.BaseTasks.BaseTask import BaseTask
 
 
 app = Celery("ESIRabbit")
@@ -21,6 +22,8 @@ class CeleryApp:
         app.conf.update(broker_url=broker_url)
         app.conf.update(result_backend=result_backend)
         self.max_concurrency = max_concurrency
+        BaseTask.set_redis_details(host=result_host, port=result_port, db=result_db,
+                                   user=result_user, password=result_password)
 
     def get_queues(self):
         queues = ["ESIRabbitDefault"]

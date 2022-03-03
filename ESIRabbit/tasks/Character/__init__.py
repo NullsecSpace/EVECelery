@@ -1,0 +1,1 @@
+from .CharacterPublicInfo import CharacterPublicInfo
