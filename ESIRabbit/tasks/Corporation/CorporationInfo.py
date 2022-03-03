@@ -1,4 +1,4 @@
-from ESIRabbit.celery import app
+from ESIRabbit.CeleryApp import app
 from ESIRabbit.tasks.BaseTasks.BaseTask import BaseTask
 from ESIRabbit.tasks.BaseTasks.ESIResqust import ESIRequest
 from ESIRabbit.exceptions.tasks import InputValidationError

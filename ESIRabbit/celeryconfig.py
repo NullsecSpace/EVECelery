@@ -1,28 +1,3 @@
-import os
-
-
-def get_broker_url():
-    """read env vars for rabbit mq to generate connect url"""
-    user = os.environ["MessageQueueUser"]
-    password = os.environ["MessageQueuePassword"]
-    host = os.environ["MessageQueueHost"]
-    port = os.environ["MessageQueuePort"]
-    vhost = os.environ["MessageQueueVhost"]
-    return f"amqp://{user}:{password}@{host}:{port}/{vhost}"
-
-
-def get_redis_url():
-    """read env vars for redis to generate connect url"""
-    user = os.environ["RedisUser"]
-    password = os.environ["RedisPassword"]
-    host = os.environ["RedisHost"]
-    port = os.environ["RedisPort"]
-    db = os.environ["RedisDb"]
-    return f"redis://{user}:{password}@{host}:{port}/{db}"
-
-
-broker_url = get_broker_url()
-result_backend = get_redis_url()
 task_serializer = 'json'
 result_serializer = 'json'
 accept_content = ['json']
@@ -39,7 +14,7 @@ include = ["ESIRabbit.tasks.Alliance.AllianceInfo",
            "ESIRabbit.tasks.Universe.SystemInfo",
            "ESIRabbit.tasks.Universe.TypeInfo"
            ]
-task_default_queue = "CeleryDefault"
+task_default_queue = "ESIRabbitDefault"
 task_routes = {
                "ESIRabbit.tasks.Alliance.AllianceInfo.*": {"queue": "GetAllianceInfo"},
                "ESIRabbit.tasks.Character.CharacterPublicInfo.*": {"queue": "GetCharacterPublicInfo"},
