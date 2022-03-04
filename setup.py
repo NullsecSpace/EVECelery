@@ -3,7 +3,7 @@
 import setuptools
 
 setuptools.setup(name='ESIRabbit',
-                 version='0.2',
+                 version='0.3',
                  description='ESI task queues for distributed API access using RabbitMQ and Redis.',
                  author_email='maintainers@eveinsight.net',
                  url='https://github.com/EVEInsight/ESIRabbit',
