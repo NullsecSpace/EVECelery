@@ -1,8 +1,12 @@
-from celery import Celery
+from celery import Celery, Task
 import os
 from ESIRabbit.celeryconfig import task_routes
 from ESIRabbit.tasks.BaseTasks.BaseTask import BaseTask
-
+from ESIRabbit.tasks.Alliance import *
+from ESIRabbit.tasks.Character import *
+from ESIRabbit.tasks.Corporation import *
+from ESIRabbit.tasks.Market import *
+from ESIRabbit.tasks.Universe import *
 
 app = Celery("ESIRabbit")
 
@@ -10,32 +14,43 @@ app = Celery("ESIRabbit")
 class CeleryApp:
     def __init__(self, broker_user: str, broker_password: str, broker_host: str, broker_port: str, broker_vhost: str,
                  result_user: str, result_password: str, result_host: str, result_port: str, result_db: str,
-                 config_object: str = "ESIRabbit.celeryconfig", additional_queues: list[str] = None,
-                 max_concurrency: int = 10):
-        if additional_queues is None:
-            self.additional_queues = []
-        else:
-            self.additional_queues = additional_queues
+                 config_object: str = "ESIRabbit.celeryconfig"):
         app.config_from_object(config_object)
         broker_url = f"amqp://{broker_user}:{broker_password}@{broker_host}:{broker_port}/{broker_vhost}"
         result_backend = f"redis://{result_user}:{result_password}@{result_host}:{result_port}/{result_db}"
         app.conf.update(broker_url=broker_url)
         app.conf.update(result_backend=result_backend)
-        self.max_concurrency = max_concurrency
         BaseTask.set_redis_details(host=result_host, port=result_port, db=result_db,
                                    user=result_user, password=result_password)
-
-    def get_queues(self):
-        queues = ["ESIRabbitDefault"]
+        self.queues = ["ESIRabbitDefault"]
         for k, v in task_routes.items():
-            queues.append(v.get("queue"))
-        queues += self.additional_queues
-        return queues
+            self.queues.append(v["queue"])
 
-    def start(self):
-        app.start(argv=["worker", "-l", "WARNING", f"--autoscale={self.max_concurrency},2",
-                        "-Q", ",".join(self.get_queues())])
+        default_tasks = [AllianceInfo(),
+                         CharacterPublicInfo(),
+                         CorporationInfo(),
+                         PricesList(),
+                         CategoryInfo(),
+                         ConstellationInfo(),
+                         FactionsList(),
+                         GroupInfo(),
+                         RegionInfo(),
+                         SystemInfo(),
+                         TypeInfo()
+                         ]
+        self.register_tasks(default_tasks)
 
+    def register_additional_queues(self, queues: list[str]):
+        for q in queues:
+            self.queues.append(q)
+
+    def register_tasks(self, tasks: list[Task]):
+        for t in tasks:
+            app.register_task(t)
+
+    def start(self, max_concurrency: int = 10):
+        app.start(argv=["worker", "-l", "WARNING", f"--autoscale={max_concurrency},1",
+                        "-Q", ",".join(self.queues)])
 
 def main():
     c = CeleryApp(os.environ["BrokerUser"], os.environ["BrokerPassword"], os.environ["BrokerHost"],

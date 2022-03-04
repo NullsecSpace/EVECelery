@@ -24,3 +24,4 @@ class BaseTask(Task):
         cls._redis_db = db
         cls._redis_user = user
         cls._redis_password = password
+

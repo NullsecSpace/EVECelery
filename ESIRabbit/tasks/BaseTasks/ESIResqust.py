@@ -8,11 +8,20 @@ import json
 import requests
 from datetime import datetime
 from dateutil.parser import parse as dtparse
+from .BaseTask import BaseTask
 
 
-class ESIRequest(object):
-    @classmethod
-    def ttl_404(cls) -> int:
+class ESIRequest(BaseTask):
+    autoretry_for = (Exception,)
+    max_retries = 3
+    retry_backoff = 5
+    retry_backoff_max = 600
+    retry_jitter = False
+
+    def __init__(self):
+        self.name = self.__class__.__name__
+
+    def ttl_404(self) -> int:
         """Returns the redis TTL for caching ESI responses that errored with a 404 - not found
 
         :return: Seconds to cache a 404 not found ESI response in Redis
@@ -20,8 +29,7 @@ class ESIRequest(object):
         """
         return 86400
 
-    @classmethod
-    def get_key(cls, **kwargs) -> str:
+    def get_key(self, **kwargs) -> str:
         """Returns the Redis key name for storing ESI responses
 
         :param kwargs: ESI request parameters
@@ -30,19 +38,17 @@ class ESIRequest(object):
         """
         raise NotImplementedError
 
-    @classmethod
-    def get_lock_key(cls, **kwargs) -> str:
+    def get_lock_key(self, **kwargs) -> str:
         """Returns the Redis key name for storing ESI locks
 
         :param kwargs: ESI request parameters
         :return: Redis key for storing ESI locks
         :rtype: str
         """
-        k = cls.get_key(**kwargs)
+        k = self.get_key(**kwargs)
         return f"Lock-{k}"
 
-    @classmethod
-    def base_url(cls) -> str:
+    def base_url(self) -> str:
         """Base URL for ESI requests
 
         :return: ESI base request URL
@@ -50,8 +56,7 @@ class ESIRequest(object):
         """
         return "https://esi.evetech.net/latest"
 
-    @classmethod
-    def route(cls, **kwargs) -> str:
+    def route(self, **kwargs) -> str:
         """ESI route with input request parameters
 
         :param kwargs: ESI request parameters to fill in the ESI request string
@@ -60,21 +65,18 @@ class ESIRequest(object):
         """
         raise NotImplementedError
 
-    @classmethod
-    def request_url(cls, **kwargs) -> str:
+    def request_url(self, **kwargs) -> str:
         """ESI request URL with request parameters
 
         :param kwargs: ESI request parameters to fill in the ESI request string
         :return: ESI request URL with request parameters
         :rtype: str
         """
-        return f"{cls.base_url()}{cls.route(**kwargs)}/?datasource=tranquility"
+        return f"{self.base_url()}{self.route(**kwargs)}/?datasource=tranquility"
 
-    @classmethod
-    def get_cached(cls, redis: Redis, **kwargs):
+    def get_cached(self, **kwargs):
         """Get the cached response from ESI immediately without invoking an ESI call.
 
-        :param redis: The redis client
         :param kwargs: ESI request parameters
         :return: Dictionary or list containing cached response from ESI.
             If ESI returned a 404 error dictionary the response will be in the form
@@ -85,27 +87,14 @@ class ESIRequest(object):
         :raises ESIRabbit.exceptions.ESI.InputValidationError: If an input ESI parameter contains
             invalid syntax or is a known invalid ID
         """
-        cls.validate_inputs(**kwargs)
-        cached_data = redis.get(cls.get_key(**kwargs))
+        self.validate_inputs(**kwargs)
+        cached_data = self.redis.get(self.get_key(**kwargs))
         if cached_data:
             return json.loads(cached_data)
         else:
             raise NotResolved(f"Not resolved. ESI request parameters: {kwargs}")
 
-    @classmethod
-    def _get_celery_async_result(cls, ignore_result: bool = False, **kwargs) -> AsyncResult:
-        """Call the celery task and return an async result / promise of future evaluation
-
-        :param ignore_result: Set false to store result in celery result backend, else ignore the result.
-        :type ignore_result: bool
-        :param kwargs: ESI request parameters
-        :return: Promise for a future evaluation of a celery task
-        :rtype: celery.result.AsyncResult
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def get_async(cls, ignore_result: bool = False, **kwargs) -> AsyncResult:
+    def get_async(self, ignore_result: bool = False, **kwargs) -> AsyncResult:
         """Returns an async result / promise representing the future evaluation of a task.
         This function does not block the calling process and returns immediately.
 
@@ -115,11 +104,10 @@ class ESIRequest(object):
         :return: Promise for a future evaluation of a celery task
         :rtype: celery.result.AsyncResult
         """
-        cls.validate_inputs(**kwargs)
-        return cls._get_celery_async_result(ignore_result=ignore_result, **kwargs)
+        self.validate_inputs(**kwargs)
+        return self.apply_async(ignore_result=ignore_result, kwargs=kwargs)
 
-    @classmethod
-    def get_sync(cls, timeout: float = 10, **kwargs):
+    def get_sync(self, timeout: float = 10, **kwargs):
         """Call a task and block until the result is set.
 
         :param timeout: The time in seconds to block waiting for the task to complete.
@@ -132,10 +120,12 @@ class ESIRequest(object):
             Only /universe/factions/ and /markets/prices/ returns a list, all else return dictionaries.
         :rtype: dict or list
         """
-        return cls.get_async(ignore_result=False, **kwargs).get(timeout=timeout, propagate=True)
+        return self.get_async(ignore_result=False, **kwargs).get(timeout=timeout, propagate=True)
 
-    @classmethod
-    def _request_esi(cls, redis: Redis, **kwargs):
+    def run(self, *args, **kwargs):
+        return self._request_esi(**kwargs)
+
+    def _request_esi(self, **kwargs):
         """Gets the ESI cached response.
         If the response is not yet cached or hasn't been resolved then perform an ESI call caching the new response.
 
@@ -153,17 +143,17 @@ class ESIRequest(object):
         :rtype: dict or list
         :raises ESIRabbit.exceptions.utils.ErrorLimitExceeded: If the remaining error limit is below the allowed threshold.
         """
-        lookup_key = cls.get_key(**kwargs)
-        lock_key = cls.get_lock_key(**kwargs)
-        with redis.lock(lock_key, blocking_timeout=15, timeout=300):
+        lookup_key = self.get_key(**kwargs)
+        lock_key = self.get_lock_key(**kwargs)
+        with self.redis.lock(lock_key, blocking_timeout=15, timeout=300):
             try:
-                return cls.get_cached(redis=redis, **kwargs)
+                return self.get_cached(**kwargs)
             except NotResolved:
                 pass
-            ESIErrorLimiter.check_limit(redis)
+            ESIErrorLimiter.check_limit(self.redis)
             rheaders = {}
             try:
-                resp = requests.get(cls.request_url(**kwargs), headers=RequestHeaders.get_headers(),
+                resp = requests.get(self.request_url(**kwargs), headers=RequestHeaders.get_headers(),
                                     timeout=5, verify=True)
                 rheaders = resp.headers
                 if resp.status_code == 200:
@@ -172,38 +162,37 @@ class ESIRequest(object):
                         (dtparse(rheaders["expires"], ignoretz=True) - datetime.utcnow()).total_seconds(),
                         1)
                     )
-                    redis.set(name=lookup_key, value=json.dumps(d), ex=ttl_expire)
-                    cls._hook_after_esi_success(d)
-                    ESIErrorLimiter.update_limit(redis,
+                    self.redis.set(name=lookup_key, value=json.dumps(d), ex=ttl_expire)
+                    self._hook_after_esi_success(d)
+                    ESIErrorLimiter.update_limit(self.redis,
                                                  error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
                                                  error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
                                                  time=dtparse(rheaders["date"], ignoretz=True)
                                                  )
-                    return json.loads(redis.get(lookup_key))
+                    return json.loads(self.redis.get(lookup_key))
                 elif resp.status_code == 400 or resp.status_code == 404:
                     d = {"error": str(resp.json().get("error")), "error_code": resp.status_code}
-                    redis.set(name=lookup_key, value=json.dumps(d), ex=cls.ttl_404())
-                    ESIErrorLimiter.update_limit(redis,
+                    self.redis.set(name=lookup_key, value=json.dumps(d), ex=self.ttl_404())
+                    ESIErrorLimiter.update_limit(self.redis,
                                                  error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
                                                  error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
                                                  time=dtparse(rheaders["date"], ignoretz=True)
                                                  )
-                    return json.loads(redis.get(lookup_key))
+                    return json.loads(self.redis.get(lookup_key))
                 else:
                     resp.raise_for_status()
             except Exception as ex:
                 try:
-                    ESIErrorLimiter.update_limit(redis,
+                    ESIErrorLimiter.update_limit(self.redis,
                                                  error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
                                                  error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
                                                  time=dtparse(rheaders["date"], ignoretz=True)
                                                  )
                 except KeyError:
-                    ESIErrorLimiter.decrement_limit(redis, datetime.utcnow())
+                    ESIErrorLimiter.decrement_limit(self.redis, datetime.utcnow())
                 raise ex
 
-    @classmethod
-    def _hook_after_esi_success(cls, esi_response) -> None:
+    def _hook_after_esi_success(self, esi_response) -> None:
         """Code to run with esi_response data after there was a successful 200 response from ESI.
         For example: use this function to optionally queue up additional ESI calls for ids returned.
 
@@ -213,8 +202,7 @@ class ESIRequest(object):
         """
         return
 
-    @classmethod
-    def validate_inputs(cls, **kwargs) -> None:
+    def validate_inputs(self, **kwargs) -> None:
         """Run validation checks before submitting an ESI request or hitting the cache.
 
         :param kwargs: ESI request parameters
