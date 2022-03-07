@@ -3,7 +3,7 @@ ESI API requests library using [RabbitMQ](https://www.rabbitmq.com/), [celery](h
 
 # Installation
 ```
-pip install git+https://github.com/EVEInsight/ESICelery.git
+pip install ESICelery
 ```
 
 # Usage
