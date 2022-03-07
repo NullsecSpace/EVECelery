@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 import json
 from dateutil.parser import parse as dtparse
 from ESIRabbit.exceptions.utils import ErrorLimitExceeded
-import os
 import socket
+import ESIRabbit.config
 
 
 class ErrorLimiter(object):
@@ -159,6 +159,6 @@ class ESIErrorLimiter(ErrorLimiter):
 
     @classmethod
     def max_remaining_errors(cls) -> int:
-        return int(os.environ["MaxConcurrency"])
+        return ESIRabbit.config.max_concurrency
 
 
