@@ -7,10 +7,20 @@ pip install git+https://github.com/EVEInsight/ESICelery.git
 ```
 
 # Usage
+## Starting the Celery worker server
+### From CLI
+Set the following environmental variables and then run ESICelery from the CLI.
+Variables: BrokerUser, BrokerPassword, BrokerHost, BrokerPort, BrokerVhost, ResultBackendUser, ResultBackendPassword, ResultBackendHost, ResultBackendPort, ResultBackendDb
+
+```shell
+python ESICelery
+```
+
+### From your code
 From your worker code start the Celery worker server that handles running tasks:
 
 ```python
-from ESICelery import CeleryApp
+from ESICelery.CeleryApp import CeleryApp
 
 c = CeleryApp(broker_user="user", broker_password="pass", broker_host="host", broker_port=5672, broker_vhost="esi",
               result_user="user", result_password="pass", result_host="host", result_port=6379, result_db=0,
@@ -19,10 +29,11 @@ c = CeleryApp(broker_user="user", broker_password="pass", broker_host="host", br
 c.start() # Start celery app - equivalent to running "celery worker -l WARNING --autoscale 10,1 -Q queues"
 ```
 
+## Using ESICelery in your code
 From another Python script you can send tasks to the queues and receive results:
 
 ```python
-from ESICelery import CeleryApp
+from ESICelery.CeleryApp import CeleryApp
 from ESICelery.tasks.Universe import *
 
 c = CeleryApp(broker_user="user", broker_password="pass", broker_host="host", broker_port=5672, broker_vhost="esi",
@@ -52,5 +63,5 @@ print(r)
 See the included example scripts under [docs/examples](https://github.com/EVEInsight/ESICelery/tree/main/docs/examples)
 
 # Copyright Notice
-See CCP.md
+See [CCP.md](https://github.com/EVEInsight/ESICelery/blob/main/CCP.md)
 

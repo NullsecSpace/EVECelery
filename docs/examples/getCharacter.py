@@ -1,4 +1,4 @@
-from ESICelery import CeleryApp
+from ESICelery.CeleryApp import CeleryApp
 from ESICelery.tasks.Character import *
 import os
 

@@ -105,21 +105,3 @@ class CeleryApp:
         ESICelery.config.max_concurrency = max_concurrency
         app.start(argv=["worker", "-l", "WARNING", f"--autoscale={max_concurrency},1",
                         "-Q", ",".join(self.queues)])
-
-    @classmethod
-    def main(cls):
-        try:
-            c = cls(os.environ["BrokerUser"], os.environ["BrokerPassword"], os.environ["BrokerHost"],
-                    int(os.environ["BrokerPort"]), os.environ["BrokerVhost"],
-                    os.environ["ResultBackendUser"], os.environ["ResultBackendPassword"],
-                    os.environ["ResultBackendHost"],
-                    int(os.environ["ResultBackendPort"]), int(os.environ["ResultBackendDb"]),
-                    os.environ["HeaderEmail"])
-        except KeyError as ex:
-            print("Environmental variable is not set.")
-            raise ex
-        c.start()
-
-
-if __name__ == '__main__':
-    CeleryApp.main()

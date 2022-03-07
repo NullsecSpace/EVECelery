@@ -1,1 +1,1 @@
-from .CeleryApp import CeleryApp
+__version__ = "0.7"
