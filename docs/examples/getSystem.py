@@ -1,5 +1,5 @@
 from ESIRabbit import CeleryApp
-from ESIRabbit.tasks.Character import *
+from ESIRabbit.tasks.Universe import *
 import os
 
 
@@ -11,7 +11,7 @@ def main():
                   int(os.environ["ResultBackendPort"]), int(os.environ["ResultBackendDb"]),
                   os.environ["HeaderEmail"])
 
-    r = CharacterPublicInfo().get_sync(timeout=5, character_id=1326083433)
+    r = SystemInfo().get_sync(timeout=5, system_id=30000142)
     print(r)
 
 

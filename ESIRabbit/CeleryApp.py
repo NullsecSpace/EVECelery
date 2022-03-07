@@ -11,8 +11,8 @@ app = Celery("ESIRabbit")
 
 
 class CeleryApp:
-    def __init__(self, broker_user: str, broker_password: str, broker_host: str, broker_port: str, broker_vhost: str,
-                 result_user: str, result_password: str, result_host: str, result_port: str, result_db: str,
+    def __init__(self, broker_user: str, broker_password: str, broker_host: str, broker_port: int, broker_vhost: str,
+                 result_user: str, result_password: str, result_host: str, result_port: int, result_db: int,
                  header_email: str, config_object: str = "ESIRabbit.celeryconfig", queue_prefix: str = "ESI"):
         """
 
@@ -110,10 +110,10 @@ class CeleryApp:
     def main(cls):
         try:
             c = cls(os.environ["BrokerUser"], os.environ["BrokerPassword"], os.environ["BrokerHost"],
-                    os.environ["BrokerPort"], os.environ["BrokerVhost"],
+                    int(os.environ["BrokerPort"]), os.environ["BrokerVhost"],
                     os.environ["ResultBackendUser"], os.environ["ResultBackendPassword"],
                     os.environ["ResultBackendHost"],
-                    os.environ["ResultBackendPort"], os.environ["ResultBackendDb"],
+                    int(os.environ["ResultBackendPort"]), int(os.environ["ResultBackendDb"]),
                     os.environ["HeaderEmail"])
         except KeyError as ex:
             print("Environmental variable is not set.")

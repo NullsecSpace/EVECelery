@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
 import setuptools
-from ESIRabbit.config import version
 
 setuptools.setup(name='ESIRabbit',
-                 version=version,
+                 version='0.5',
                  description='ESI task queues for distributed API access using RabbitMQ and Redis.',
                  author_email='maintainers@eveinsight.net',
                  url='https://github.com/EVEInsight/ESIRabbit',
-                 packages=['ESIRabbit'],
+                 packages=['ESIRabbit', 'ESIRabbit.exceptions', 'ESIRabbit.tasks', 'ESIRabbit.utils'],
                  install_requires=[
                        'Celery>=5.2,<6',
                        'python-dateutil>=2.8.2,<3',
