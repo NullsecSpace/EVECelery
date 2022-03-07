@@ -1,5 +1,5 @@
-from ESIRabbit import CeleryApp
-from ESIRabbit.tasks.Character import *
+from ESICelery import CeleryApp
+from ESICelery.tasks.Character import *
 import os
 
 

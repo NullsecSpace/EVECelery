@@ -1,4 +1,4 @@
-from ESIRabbit.tasks.BaseTasks.ESIResqust import ESIRequest
+from ESICelery.tasks.BaseTasks.ESIResqust import ESIRequest
 
 
 class PricesList(ESIRequest):

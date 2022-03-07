@@ -1,5 +1,5 @@
-from ESIRabbit.tasks.BaseTasks.ESIResqust import ESIRequest
-from ESIRabbit.exceptions.tasks import InputValidationError
+from ESICelery.tasks.BaseTasks.ESIResqust import ESIRequest
+from ESICelery.exceptions.tasks import InputValidationError
 from .CategoryInfo import CategoryInfo
 
 

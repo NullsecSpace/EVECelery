@@ -1,15 +1,16 @@
-# ESIRabbit
+# ESICelery
 ESI API requests library using [RabbitMQ](https://www.rabbitmq.com/), [celery](https://docs.celeryproject.org/en/stable/getting-started/introduction.html) tasks queues, and [Redis](https://redis.io/) caching.
 
 # Installation
 ```
-pip install git+https://github.com/EVEInsight/ESIRabbit.git
+pip install git+https://github.com/EVEInsight/ESICelery.git
 ```
 
 # Usage
 From your worker code start the Celery worker server that handles running tasks:
+
 ```python
-from ESIRabbit import CeleryApp
+from ESICelery import CeleryApp
 
 c = CeleryApp(broker_user="user", broker_password="pass", broker_host="host", broker_port=5672, broker_vhost="esi",
               result_user="user", result_password="pass", result_host="host", result_port=6379, result_db=0,
@@ -19,9 +20,10 @@ c.start() # Start celery app - equivalent to running "celery worker -l WARNING -
 ```
 
 From another Python script you can send tasks to the queues and receive results:
+
 ```python
-from ESIRabbit import CeleryApp
-from ESIRabbit.tasks.Universe import *
+from ESICelery import CeleryApp
+from ESICelery.tasks.Universe import *
 
 c = CeleryApp(broker_user="user", broker_password="pass", broker_host="host", broker_port=5672, broker_vhost="esi",
               result_user="user", result_password="pass", result_host="host", result_port=6379, result_db=0,
@@ -32,7 +34,7 @@ print(r)
 
 # Current supported endpoints
 
-| ESI Route                                    | ESIRabbit Task        |
+| ESI Route                                    | ESICelery Task        |
 |----------------------------------------------|-----------------------|
 | /alliances/{alliance_id}/                    | AllianceInfo()        |
 | /characters/{character_id}/                  | CharacterPublicInfo() |
@@ -47,7 +49,7 @@ print(r)
 | /universe/types/{type_id}/                   | TypeInfo()            |
 
 # Examples
-See the included example scripts under [docs/examples](https://github.com/EVEInsight/ESIRabbit/tree/main/docs/examples)
+See the included example scripts under [docs/examples](https://github.com/EVEInsight/ESICelery/tree/main/docs/examples)
 
 # Copyright Notice
 See CCP.md

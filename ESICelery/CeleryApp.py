@@ -1,33 +1,33 @@
 from celery import Celery, Task
 import os
-from ESIRabbit.tasks.Alliance import *
-from ESIRabbit.tasks.Character import *
-from ESIRabbit.tasks.Corporation import *
-from ESIRabbit.tasks.Market import *
-from ESIRabbit.tasks.Universe import *
-import ESIRabbit.config
+from ESICelery.tasks.Alliance import *
+from ESICelery.tasks.Character import *
+from ESICelery.tasks.Corporation import *
+from ESICelery.tasks.Market import *
+from ESICelery.tasks.Universe import *
+import ESICelery.config
 
-app = Celery("ESIRabbit")
+app = Celery("ESICelery")
 
 
 class CeleryApp:
     def __init__(self, broker_user: str, broker_password: str, broker_host: str, broker_port: int, broker_vhost: str,
                  result_user: str, result_password: str, result_host: str, result_port: int, result_db: int,
-                 header_email: str, config_object: str = "ESIRabbit.celeryconfig", queue_prefix: str = "ESI"):
+                 header_email: str, config_object: str = "ESICelery.celeryconfig", queue_prefix: str = "ESI"):
         """
 
         :param broker_user: RabbitMQ user
         :param broker_password: RabbitMQ password
         :param broker_host: RabbitMQ hostname
         :param broker_port: RabbitMQ port - normally 5672
-        :param broker_vhost: RabbitMQ vhost - namespace for all ESIRabbit queues
+        :param broker_vhost: RabbitMQ vhost - namespace for all ESICelery queues
         :param result_user: Redis user - normally "default" if not explicitly configured
         :param result_password: Redis password
         :param result_host: Redis hostname
         :param result_port: Redis port - normally 6379
         :param result_db: Redis db - normally 0 for the default db
         :param header_email: Your contact email to include in http requests to ESI and ZK
-        :param config_object: Custom config object to overwrite the default ESIRabbit.celeryconfig - optional
+        :param config_object: Custom config object to overwrite the default ESICelery.celeryconfig - optional
         :param queue_prefix: Prefix to add to all generated queue names
         """
         app.config_from_object(config_object)
@@ -37,12 +37,12 @@ class CeleryApp:
         app.conf.update(result_backend=result_backend)
         app.conf.update(task_default_queue=f"{queue_prefix}Default")
 
-        ESIRabbit.config.header_email = header_email
-        ESIRabbit.config.redis_host = result_host
-        ESIRabbit.config.redis_port = result_port
-        ESIRabbit.config.redis_db = result_db
-        ESIRabbit.config.redis_user = result_user
-        ESIRabbit.config.redis_password = result_password
+        ESICelery.config.header_email = header_email
+        ESICelery.config.redis_host = result_host
+        ESICelery.config.redis_port = result_port
+        ESICelery.config.redis_db = result_db
+        ESICelery.config.redis_user = result_user
+        ESICelery.config.redis_password = result_password
 
         self.queues = [f"{queue_prefix}Default"]
         self.task_routes = {}
@@ -102,7 +102,7 @@ class CeleryApp:
         :param max_concurrency: The maximum number of processes that celery can autoscale to.
         :return: None
         """
-        ESIRabbit.config.max_concurrency = max_concurrency
+        ESICelery.config.max_concurrency = max_concurrency
         app.start(argv=["worker", "-l", "WARNING", f"--autoscale={max_concurrency},1",
                         "-Q", ",".join(self.queues)])
 

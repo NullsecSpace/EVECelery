@@ -2,9 +2,9 @@ from redis import Redis
 from datetime import datetime, timedelta
 import json
 from dateutil.parser import parse as dtparse
-from ESIRabbit.exceptions.utils import ErrorLimitExceeded
+from ESICelery.exceptions.utils import ErrorLimitExceeded
 import socket
-import ESIRabbit.config
+import ESICelery.config
 
 
 class ErrorLimiter(object):
@@ -85,7 +85,7 @@ class ErrorLimiter(object):
 
         :param redis: The redis client
         :return: None
-        :raises ESIRabbit.exceptions.utils.ErrorLimitExceeded: If the remaining error limit is below the allowed threshold.
+        :raises ESICelery.exceptions.utils.ErrorLimitExceeded: If the remaining error limit is below the allowed threshold.
         """
         with redis.lock(cls.get_lock_key(), blocking_timeout=5, timeout=300):
             current_error_info = cls.get_redis(redis)
@@ -159,6 +159,6 @@ class ESIErrorLimiter(ErrorLimiter):
 
     @classmethod
     def max_remaining_errors(cls) -> int:
-        return ESIRabbit.config.max_concurrency
+        return ESICelery.config.max_concurrency
 
 

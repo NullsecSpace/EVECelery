@@ -1,7 +1,7 @@
-from ESIRabbit.exceptions.tasks import NotResolved, InputValidationError
-from ESIRabbit.exceptions.utils import ErrorLimitExceeded
-from ESIRabbit.utils.ErrorLimiter import ESIErrorLimiter
-from ESIRabbit.utils.RequestHeaders import RequestHeaders
+from ESICelery.exceptions.tasks import NotResolved, InputValidationError
+from ESICelery.exceptions.utils import ErrorLimitExceeded
+from ESICelery.utils.ErrorLimiter import ESIErrorLimiter
+from ESICelery.utils.RequestHeaders import RequestHeaders
 from redis import Redis
 from celery.result import AsyncResult
 import json
@@ -83,8 +83,8 @@ class ESIRequest(BaseTask):
             {"error": error_message, "error_code": 404}
             Only /universe/factions/ and /markets/prices/ returns a list, all else return dictionaries.
         :rtype: dict or list
-        :raises ESIRabbit.exceptions.ESI.NotResolved: If the request has not yet been resolved by ESI.
-        :raises ESIRabbit.exceptions.ESI.InputValidationError: If an input ESI parameter contains
+        :raises ESICelery.exceptions.ESI.NotResolved: If the request has not yet been resolved by ESI.
+        :raises ESICelery.exceptions.ESI.InputValidationError: If an input ESI parameter contains
             invalid syntax or is a known invalid ID
         """
         self.validate_inputs(**kwargs)
@@ -141,7 +141,7 @@ class ESIRequest(BaseTask):
             If the response requires inputs a dictionary is usually returned.
             Only /universe/factions/ and /markets/prices/ returns a list, all else return dictionaries.
         :rtype: dict or list
-        :raises ESIRabbit.exceptions.utils.ErrorLimitExceeded: If the remaining error limit is below the allowed threshold.
+        :raises ESICelery.exceptions.utils.ErrorLimitExceeded: If the remaining error limit is below the allowed threshold.
         """
         lookup_key = self.get_key(**kwargs)
         lock_key = self.get_lock_key(**kwargs)
@@ -207,7 +207,7 @@ class ESIRequest(BaseTask):
 
         :param kwargs: ESI request parameters
         :return: None
-        :raises ESIRabbit.exceptions.ESI.InputValidationError: If an input ESI parameter contains
+        :raises ESICelery.exceptions.ESI.InputValidationError: If an input ESI parameter contains
             invalid syntax or is a known invalid ID
         """
         raise NotImplementedError

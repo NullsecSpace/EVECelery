@@ -1,5 +1,5 @@
-from ESIRabbit import CeleryApp
-from ESIRabbit.tasks.Universe import *
+from ESICelery import CeleryApp
+from ESICelery.tasks.Universe import *
 import os
 
 
