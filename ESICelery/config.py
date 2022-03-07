@@ -5,4 +5,3 @@ redis_host: str = None
 redis_port: int = None
 redis_db: int = None
 redis_password: str = None
-version: str = "0.5"
