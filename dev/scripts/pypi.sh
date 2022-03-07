@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Twine username is __token__ and password is access token
+
 rm -rf dist/
 python3 -m pip install --upgrade build
 python3 -m build
