@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 
 import setuptools
-from ESICelery import __version__
+import ESICelery
 
 
 with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setuptools.setup(name='ESICelery',
-                 version=__version__,
-                 description='ESI celery task queues for distributed API access using RabbitMQ and Redis.',
-                 license="GNU General Public License v3.0",
+                 version=ESICelery.__version__,
+                 description=ESICelery.__description__,
+                 license=ESICelery.__license__,
                  long_description=long_description,
                  long_description_content_type="text/markdown",
-                 author_email='maintainers@eveinsight.net',
-                 url='https://github.com/EVEInsight/ESICelery',
+                 author_email=ESICelery.__author_email__,
+                 url=ESICelery.__url__,
                  packages=setuptools.find_packages(include=["ESICelery", "ESICelery.*"]),
                  install_requires=[
                        'Celery>=5.2,<6',

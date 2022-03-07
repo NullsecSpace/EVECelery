@@ -1,5 +1,4 @@
 from celery import Celery, Task
-import os
 from ESICelery.tasks.Alliance import *
 from ESICelery.tasks.Character import *
 from ESICelery.tasks.Corporation import *
@@ -103,5 +102,6 @@ class CeleryApp:
         :return: None
         """
         ESICelery.config.max_concurrency = max_concurrency
+        print(f"ESICelery {ESICelery.__version__} ({ESICelery.__url__})\n{ESICelery.__license__}")
         app.start(argv=["worker", "-l", "WARNING", f"--autoscale={max_concurrency},1",
                         "-Q", ",".join(self.queues)])
