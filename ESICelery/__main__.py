@@ -1,15 +1,20 @@
-from ESICelery.CeleryApp import CeleryApp
+from ESICelery.CeleryApps import CeleryWorker, CeleryBeat
 import os
+import sys
 
 
 def main():
+    if "--beat" in sys.argv:
+        celery_server = CeleryBeat
+    else:
+        celery_server = CeleryWorker
     try:
-        c = CeleryApp(os.environ["BrokerUser"], os.environ["BrokerPassword"], os.environ["BrokerHost"],
-                      int(os.environ["BrokerPort"]), os.environ["BrokerVhost"],
-                      os.environ["ResultBackendUser"], os.environ["ResultBackendPassword"],
-                      os.environ["ResultBackendHost"],
-                      int(os.environ["ResultBackendPort"]), int(os.environ["ResultBackendDb"]),
-                      os.environ["HeaderEmail"])
+        c = celery_server(os.environ["BrokerUser"], os.environ["BrokerPassword"], os.environ["BrokerHost"],
+                          int(os.environ["BrokerPort"]), os.environ["BrokerVhost"],
+                          os.environ["ResultBackendUser"], os.environ["ResultBackendPassword"],
+                          os.environ["ResultBackendHost"],
+                          int(os.environ["ResultBackendPort"]), int(os.environ["ResultBackendDb"]),
+                          os.environ["HeaderEmail"])
     except KeyError as ex:
         print("Environmental variable is not set.")
         raise ex

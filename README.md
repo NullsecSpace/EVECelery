@@ -20,25 +20,26 @@ python ESICelery
 From your worker code start the Celery worker server that handles running tasks:
 
 ```python
-from ESICelery.CeleryApp import CeleryApp
+from ESICelery.CeleryApps import CeleryWorker
 
-c = CeleryApp(broker_user="user", broker_password="pass", broker_host="host", broker_port=5672, broker_vhost="esi",
-              result_user="user", result_password="pass", result_host="host", result_port=6379, result_db=0,
-              header_email="youremail@example.com")
+c = CeleryWorker(broker_user="user", broker_password="pass", broker_host="host", broker_port=5672, broker_vhost="esi",
+                 result_user="user", result_password="pass", result_host="host", result_port=6379, result_db=0,
+                 header_email="youremail@example.com")
 
-c.start() # Start celery app - equivalent to running "celery worker -l WARNING --autoscale 10,1 -Q queues"
+c.start(
+    max_concurrency=10)  # Start celery app - equivalent to running "celery worker -l WARNING --autoscale 10,1 -Q queues"
 ```
 
 ## Using ESICelery in your code
 From another Python script you can send tasks to the queues and receive results:
 
 ```python
-from ESICelery.CeleryApp import CeleryApp
+from ESICelery.CeleryApps import CeleryWorker
 from ESICelery.tasks.Universe import *
 
-c = CeleryApp(broker_user="user", broker_password="pass", broker_host="host", broker_port=5672, broker_vhost="esi",
-              result_user="user", result_password="pass", result_host="host", result_port=6379, result_db=0,
-              header_email="youremail@example.com") # only need to call this once in our code to init the tasks
+c = CeleryWorker(broker_user="user", broker_password="pass", broker_host="host", broker_port=5672, broker_vhost="esi",
+                 result_user="user", result_password="pass", result_host="host", result_port=6379, result_db=0,
+                 header_email="youremail@example.com")  # only need to call this once in our code to init the tasks
 r = SystemInfo().get_sync(timeout=5, system_id=30000142)
 print(r)
 ```
