@@ -6,6 +6,9 @@ import ESICelery.config
 class BaseTask(Task):
     _redis: redis.Redis = None
 
+    def __init__(self):
+        self.name = self.__class__.__name__
+
     @property
     def redis(self) -> redis.Redis:
         if self._redis is None:

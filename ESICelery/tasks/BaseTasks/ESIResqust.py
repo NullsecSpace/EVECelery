@@ -18,9 +18,6 @@ class ESIRequest(BaseTask):
     retry_backoff_max = 600
     retry_jitter = False
 
-    def __init__(self):
-        self.name = self.__class__.__name__
-
     def ttl_404(self) -> int:
         """Returns the redis TTL for caching ESI responses that errored with a 404 - not found
 
