@@ -3,4 +3,4 @@ __description__ = 'ESI celery task queues for distributed API access using Rabbi
 __license__ = 'GNU General Public License v3.0'
 __title__ = 'ESICelery'
 __url__ = 'https://github.com/EVEInsight/ESICelery'
-__version__ = '0.10'
+__version__ = '0.11'
