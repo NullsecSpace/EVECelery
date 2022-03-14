@@ -23,18 +23,19 @@ class CeleryWorker(object):
     :param result_db: Redis db - normally 0 for the default db
     :param header_email: Your contact email to include in http requests to ESI and ZK
     :param config_object: Custom config object to overwrite the default ESICelery.celeryconfig - optional
-    :param queue_prefix: Prefix to add to all generated queue names
+    :param esi_queue_prefix: Prefix to add to all generated ESI queue names
     """
     def __init__(self, broker_user: str, broker_password: str, broker_host: str, broker_port: int, broker_vhost: str,
                  result_user: str, result_password: str, result_host: str, result_port: int, result_db: int,
-                 header_email: str, config_object: str = "ESICelery.celeryconfig", queue_prefix: str = ""):
+                 header_email: str, config_object: str = "ESICelery.celeryconfig", esi_queue_prefix: str = "ESI"):
+        self.esi_queue_prefix = esi_queue_prefix
         self.app = Celery("ESICelery")
         self.app.config_from_object(config_object)
         broker_url = f"amqp://{broker_user}:{broker_password}@{broker_host}:{broker_port}/{broker_vhost}"
         result_backend = f"redis://{result_user}:{result_password}@{result_host}:{result_port}/{result_db}"
         self.app.conf.update(broker_url=broker_url)
         self.app.conf.update(result_backend=result_backend)
-        self.app.conf.update(task_default_queue=f"{queue_prefix}Default")
+        self.app.conf.update(task_default_queue=f"{self.esi_queue_prefix}Default")
 
         ESICelery.config.header_email = header_email
         ESICelery.config.redis_host = result_host
@@ -43,13 +44,16 @@ class CeleryWorker(object):
         ESICelery.config.redis_user = result_user
         ESICelery.config.redis_password = result_password
 
-        self.queues = [f"{queue_prefix}Default"]
+        self.queues = [f"{self.esi_queue_prefix}Default"]
         self.task_routes = {}
         self.beat_schedule = {}
-        self._register_defaults(queue_prefix)
+        self._register_defaults()
 
-    @staticmethod
-    def default_tasks():
+    def esi_tasks(self):
+        """Default ESI tasks
+
+        :return: ESI task instances registered by default
+        """
         yield AllianceInfo()
         yield CharacterPublicInfo()
         yield CorporationInfo()
@@ -62,12 +66,19 @@ class CeleryWorker(object):
         yield SystemInfo()
         yield TypeInfo()
 
-    def _register_defaults(self, queue_prefix: str):
-        for t in self.default_tasks():
-            queue_name = f"{queue_prefix}{t.name}"
-            self.register_task(t)
-            self.register_additional_queue(queue_name)
-            self.register_task_route(t.name, queue_name)
+    def tasks_to_register(self):
+        """Yields tuple pairs of (task, queue name) to register with the Celery app
+
+        :return: yields tuple consisting of (task instance, queue name)
+        """
+        for t in self.esi_tasks():
+            yield (t, f"{self.esi_queue_prefix}{t.name}")
+
+    def _register_defaults(self):
+        for t in self.tasks_to_register():
+            self.register_task(t[0])
+            self.register_additional_queue(t[1])
+            self.register_task_route(t[0].name, t[1])
 
     def register_additional_queue(self, queue: str):
         """Register an additional queue that this Celery app should process.
@@ -132,4 +143,3 @@ class CeleryBeat(CeleryWorker):
     def start(self):
         self.print_header()
         self.app.start(argv=["beat"])
-
