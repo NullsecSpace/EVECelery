@@ -5,6 +5,7 @@ from ESICelery.tasks.Corporation import *
 from ESICelery.tasks.Market import *
 from ESICelery.tasks.Universe import *
 import ESICelery.config
+import os
 
 
 class CeleryWorker(object):
@@ -120,6 +121,20 @@ class CeleryWorker(object):
         self.print_header()
         self.app.start(argv=["worker", "-l", "WARNING", f"--autoscale={max_concurrency},1",
                              "-Q", ",".join(self.queues)])
+
+    @classmethod
+    def create_class(cls):
+        """helper function to create an instance of the celery app reading the config variables from env variables.
+
+        :return: An instance of the celery app wrapper class
+        :rtype: cls
+        """
+        c = cls(os.environ["BrokerUser"], os.environ["BrokerPassword"], os.environ["BrokerHost"],
+                int(os.environ["BrokerPort"]), os.environ["BrokerVhost"],
+                os.environ["ResultBackendUser"], os.environ["ResultBackendPassword"], os.environ["ResultBackendHost"],
+                int(os.environ["ResultBackendPort"]), int(os.environ["ResultBackendDb"]),
+                os.environ["HeaderEmail"])
+        return c
 
 
 class CeleryBeat(CeleryWorker):
