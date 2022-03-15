@@ -3,6 +3,7 @@ from ESICelery.tasks.Alliance import *
 from ESICelery.tasks.Character import *
 from ESICelery.tasks.Corporation import *
 from ESICelery.tasks.Market import *
+from ESICelery.tasks.Routes import *
 from ESICelery.tasks.Universe import *
 import ESICelery.config
 import os
@@ -64,6 +65,7 @@ class CeleryWorker(object):
         yield FactionsList()
         yield GroupInfo()
         yield RegionInfo()
+        yield Route()
         yield SystemInfo()
         yield TypeInfo()
 
