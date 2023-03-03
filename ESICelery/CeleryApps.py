@@ -1,12 +1,15 @@
 from celery import Celery, Task
+from ESICelery.__version__ import __version__, __url__, __license__
 from ESICelery.tasks.Alliance import *
 from ESICelery.tasks.Character import *
 from ESICelery.tasks.Corporation import *
 from ESICelery.tasks.Market import *
 from ESICelery.tasks.Routes import *
 from ESICelery.tasks.Universe import *
-import ESICelery.config
+from ESICelery.clients.ClientRabbitMQ import ClientRabbitMQ
+from ESICelery.clients.ClientRedis import ClientRedisResultBackend
 import os
+from typing import Optional
 
 
 class CeleryWorker(object):
@@ -23,28 +26,33 @@ class CeleryWorker(object):
     :param result_host: Redis hostname
     :param result_port: Redis port - normally 6379
     :param result_db: Redis db - normally 0 for the default db
-    :param header_email: Your contact email to include in http requests to ESI and ZK
     :param config_object: Custom config object to overwrite the default ESICelery.celeryconfig - optional
     :param esi_queue_prefix: Prefix to add to all generated ESI queue names
     """
-    def __init__(self, broker_user: str, broker_password: str, broker_host: str, broker_port: int, broker_vhost: str,
-                 result_user: str, result_password: str, result_host: str, result_port: int, result_db: int,
-                 header_email: str, config_object: str = "ESICelery.celeryconfig", esi_queue_prefix: str = "ESI"):
+
+    def __init__(self, broker_user: Optional[str] = None, broker_password: Optional[str] = None,
+                 broker_host: Optional[str] = None, broker_port: Optional[int] = None,
+                 broker_vhost: Optional[str] = None,
+                 result_user: Optional[str] = None, result_password: Optional[str] = None,
+                 result_host: Optional[str] = None, result_port: Optional[int] = None, result_db: Optional[int] = None,
+                 config_object: str = "ESICelery.celeryconfig", esi_queue_prefix: str = "ESI-",
+                 connection_check: bool = False):
+        self.broker = ClientRabbitMQ(user=broker_user, password=broker_password, host=broker_host, port=broker_port,
+                                     vhost=broker_vhost)
+        self.result_backend = ClientRedisResultBackend(user=result_user, password=result_password, host=result_host,
+                                                       port=result_port, db=result_db)
+
+        if connection_check:
+            self.result_backend.check_connection()
+
+        self.max_concurrency = int(os.environ.get('EVECelery_MaxConcurrency', 4))
+
         self.esi_queue_prefix = esi_queue_prefix
         self.app = Celery("ESICelery")
         self.app.config_from_object(config_object)
-        broker_url = f"amqp://{broker_user}:{broker_password}@{broker_host}:{broker_port}/{broker_vhost}"
-        result_backend = f"redis://{result_user}:{result_password}@{result_host}:{result_port}/{result_db}"
-        self.app.conf.update(broker_url=broker_url)
-        self.app.conf.update(result_backend=result_backend)
+        self.app.conf.update(broker_url=self.broker.connection_str)
+        self.app.conf.update(result_backend=self.result_backend.connection_str)
         self.app.conf.update(task_default_queue=f"{self.esi_queue_prefix}Default")
-
-        ESICelery.config.header_email = header_email
-        ESICelery.config.redis_host = result_host
-        ESICelery.config.redis_port = result_port
-        ESICelery.config.redis_db = result_db
-        ESICelery.config.redis_user = result_user
-        ESICelery.config.redis_password = result_password
 
         self.queues = [f"{self.esi_queue_prefix}Default"]
         self.task_routes = {}
@@ -111,32 +119,16 @@ class CeleryWorker(object):
 
     @classmethod
     def print_header(cls):
-        print(f"ESICelery {ESICelery.__version__} ({ESICelery.__url__})\n{ESICelery.__license__}")
+        print(f"ESICelery {__version__} ({__url__})\n{__license__}")
 
-    def start(self, max_concurrency: int = 10):
+    def start(self):
         """Starts the Celery app and beings processing messages in the queues.
 
-        :param max_concurrency: The maximum number of processes that celery can autoscale to.
         :return: None
         """
-        ESICelery.config.max_concurrency = max_concurrency
         self.print_header()
-        self.app.start(argv=["worker", "-l", "WARNING", f"--autoscale={max_concurrency},1",
+        self.app.start(argv=["worker", "-l", "WARNING", f"--autoscale={self.max_concurrency},1",
                              "-Q", ",".join(self.queues)])
-
-    @classmethod
-    def create_class(cls):
-        """helper function to create an instance of the celery app reading the config variables from env variables.
-
-        :return: An instance of the celery app wrapper class
-        :rtype: cls
-        """
-        c = cls(os.environ["BrokerUser"], os.environ["BrokerPassword"], os.environ["BrokerHost"],
-                int(os.environ["BrokerPort"]), os.environ["BrokerVhost"],
-                os.environ["ResultBackendUser"], os.environ["ResultBackendPassword"], os.environ["ResultBackendHost"],
-                int(os.environ["ResultBackendPort"]), int(os.environ["ResultBackendDb"]),
-                os.environ["HeaderEmail"])
-        return c
 
 
 class CeleryBeat(CeleryWorker):

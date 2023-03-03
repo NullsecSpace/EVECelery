@@ -85,7 +85,7 @@ class ESIRequest(BaseTask):
             invalid syntax or is a known invalid ID
         """
         self.validate_inputs(**kwargs)
-        cached_data = self.redis.get(self.get_key(**kwargs))
+        cached_data = self.redis_cache.get(self.get_key(**kwargs))
         if cached_data:
             return json.loads(cached_data)
         else:
@@ -142,12 +142,12 @@ class ESIRequest(BaseTask):
         """
         lookup_key = self.get_key(**kwargs)
         lock_key = self.get_lock_key(**kwargs)
-        with self.redis.lock(lock_key, blocking_timeout=15, timeout=300):
+        with self.redis_cache.lock(lock_key, blocking_timeout=15, timeout=300):
             try:
                 return self.get_cached(**kwargs)
             except NotResolved:
                 pass
-            ESIErrorLimiter.check_limit(self.redis)
+            ESIErrorLimiter.check_limit(self.redis_cache)
             rheaders = {}
             try:
                 resp = requests.get(self.request_url(**kwargs), headers=RequestHeaders.get_headers(),
@@ -159,34 +159,34 @@ class ESIRequest(BaseTask):
                         (dtparse(rheaders["expires"], ignoretz=True) - datetime.utcnow()).total_seconds(),
                         1)
                     )
-                    self.redis.set(name=lookup_key, value=json.dumps(d), ex=ttl_expire)
+                    self.redis_cache.set(name=lookup_key, value=json.dumps(d), ex=ttl_expire)
                     self._hook_after_esi_success(d)
-                    ESIErrorLimiter.update_limit(self.redis,
+                    ESIErrorLimiter.update_limit(self.redis_cache,
                                                  error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
                                                  error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
                                                  time=dtparse(rheaders["date"], ignoretz=True)
                                                  )
-                    return json.loads(self.redis.get(lookup_key))
+                    return json.loads(self.redis_cache.get(lookup_key))
                 elif resp.status_code == 400 or resp.status_code == 404:
                     d = {"error": str(resp.json().get("error")), "error_code": resp.status_code}
-                    self.redis.set(name=lookup_key, value=json.dumps(d), ex=self.ttl_404())
-                    ESIErrorLimiter.update_limit(self.redis,
+                    self.redis_cache.set(name=lookup_key, value=json.dumps(d), ex=self.ttl_404())
+                    ESIErrorLimiter.update_limit(self.redis_cache,
                                                  error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
                                                  error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
                                                  time=dtparse(rheaders["date"], ignoretz=True)
                                                  )
-                    return json.loads(self.redis.get(lookup_key))
+                    return json.loads(self.redis_cache.get(lookup_key))
                 else:
                     resp.raise_for_status()
             except Exception as ex:
                 try:
-                    ESIErrorLimiter.update_limit(self.redis,
+                    ESIErrorLimiter.update_limit(self.redis_cache,
                                                  error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
                                                  error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
                                                  time=dtparse(rheaders["date"], ignoretz=True)
                                                  )
                 except KeyError:
-                    ESIErrorLimiter.decrement_limit(self.redis, datetime.utcnow())
+                    ESIErrorLimiter.decrement_limit(self.redis_cache, datetime.utcnow())
                 raise ex
 
     def _hook_after_esi_success(self, esi_response) -> None:

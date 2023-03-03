@@ -4,12 +4,7 @@ import os
 
 
 def main():
-    c = CeleryWorker(os.environ["BrokerUser"], os.environ["BrokerPassword"], os.environ["BrokerHost"],
-                     int(os.environ["BrokerPort"]), os.environ["BrokerVhost"],
-                     os.environ["ResultBackendUser"], os.environ["ResultBackendPassword"],
-                     os.environ["ResultBackendHost"],
-                     int(os.environ["ResultBackendPort"]), int(os.environ["ResultBackendDb"]),
-                     os.environ["HeaderEmail"])
+    c = CeleryWorker()
 
     r = CharacterPublicInfo().get_sync(timeout=5, character_id=1326083433)
     print(r)

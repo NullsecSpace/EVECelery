@@ -1,20 +1,27 @@
 from celery import Task
 import redis
-import ESICelery.config
+from ESICelery.clients.ClientRedis import ClientRedisLocks, ClientRedisCache
 
 
 class BaseTask(Task):
-    _redis: redis.Redis = None
+    _client_redis_locks: ClientRedisLocks = None
+    _client_redis_cache: ClientRedisCache = None
 
     def __init__(self):
         self.name = self.__class__.__name__
 
     @property
-    def redis(self) -> redis.Redis:
-        if self._redis is None:
-            self._redis = redis.Redis(username=ESICelery.config.redis_user,
-                                      host=ESICelery.config.redis_host,
-                                      port=ESICelery.config.redis_port,
-                                      db=ESICelery.config.redis_db,
-                                      password=ESICelery.config.redis_password)
-        return self._redis
+    def redis_locks(self) -> redis.Redis:
+        if self._client_redis_locks is None:
+            c = ClientRedisLocks()
+            c.check_connection()
+            self._client_redis_locks = c
+        return self._client_redis_locks.redis
+
+    @property
+    def redis_cache(self) -> redis.Redis:
+        if self._client_redis_cache is None:
+            c = ClientRedisCache()
+            c.check_connection()
+            self._client_redis_cache = c
+        return self._client_redis_cache.redis

@@ -7,11 +7,8 @@ def main():
         celery_server = CeleryWorker
     else:
         celery_server = CeleryBeat
-    try:
-        c = celery_server.create_class()
-    except KeyError as ex:
-        print("Environmental variable is not set.")
-        raise ex
+
+    c = celery_server(connection_check=True)
     c.start()
 
 

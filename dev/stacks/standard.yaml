@@ -51,7 +51,6 @@ services:
     command: --requirepass "insightdev" --appendonly yes --appendfsync everysec
 networks:
   insightdev:
-    driver: overlay
 volumes:
   db-data:
   rabbitmq-data:

@@ -4,7 +4,7 @@ import json
 from dateutil.parser import parse as dtparse
 from ESICelery.exceptions.utils import ErrorLimitExceeded
 import socket
-import ESICelery.config
+import os
 
 
 class ErrorLimiter(object):
@@ -159,6 +159,4 @@ class ESIErrorLimiter(ErrorLimiter):
 
     @classmethod
     def max_remaining_errors(cls) -> int:
-        return ESICelery.config.max_concurrency
-
-
+        return int(os.environ.get('EVECelery_MaxConcurrency', 4))
