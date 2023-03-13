@@ -4,3 +4,10 @@ python-dateutil~=2.8.2
 redis~=4.1
 requests~=2.27
 pydantic~=1.10
+
+# dev requirements
+pytest-celery
+pytest~=7.2.0
+docker~=6.0.1
+sphinx
+sphinx-autoapi
