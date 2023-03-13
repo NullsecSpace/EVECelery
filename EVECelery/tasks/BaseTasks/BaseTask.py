@@ -1,6 +1,6 @@
 from celery import Task
 import redis
-from ESICelery.clients.ClientRedis import ClientRedisLocks, ClientRedisCache
+from EVECelery.clients.ClientRedis import ClientRedisLocks, ClientRedisCache
 
 
 class BaseTask(Task):

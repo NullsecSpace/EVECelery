@@ -1,4 +1,4 @@
-from ESICelery.CeleryApps import CeleryWorker, CeleryBeat
+from EVECelery.CeleryApps import CeleryWorker, CeleryBeat
 import sys
 
 

@@ -1,4 +1,4 @@
-from ESICelery.tasks.BaseTasks.ESIResqust import ESIRequest
+from EVECelery.tasks.BaseTasks.ESIResqust import ESIRequest
 
 
 class FactionsList(ESIRequest):

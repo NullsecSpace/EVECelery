@@ -1,5 +1,5 @@
-from ESICelery.CeleryApps import CeleryWorker
-from ESICelery.tasks.Character import *
+from EVECelery.CeleryApps import CeleryWorker
+from EVECelery.tasks.Character import *
 import os
 
 

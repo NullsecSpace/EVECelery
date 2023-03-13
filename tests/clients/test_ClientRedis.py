@@ -1,6 +1,6 @@
 from tests.TestUtils import *
 import pytest
-from ESICelery.clients.ClientRedis import *
+from EVECelery.clients.ClientRedis import *
 from pydantic import ValidationError
 from redis.exceptions import ConnectionError, AuthenticationError
 

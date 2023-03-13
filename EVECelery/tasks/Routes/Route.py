@@ -1,5 +1,5 @@
-from ESICelery.tasks.BaseTasks.ESIResqust import ESIRequest
-from ESICelery.exceptions.tasks import InputValidationError
+from EVECelery.tasks.BaseTasks.ESIResqust import ESIRequest
+from EVECelery.exceptions.tasks import InputValidationError
 
 
 class Route(ESIRequest):

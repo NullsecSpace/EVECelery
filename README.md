@@ -1,26 +1,27 @@
-# ESICelery
+# EVECelery
 ESI API requests library using [RabbitMQ](https://www.rabbitmq.com/), [celery](https://docs.celeryproject.org/en/stable/getting-started/introduction.html) tasks queues, and [Redis](https://redis.io/) caching.
 
 # Installation
 ```
-pip install ESICelery
+pip install EVECelery
 ```
 
 # Usage
 ## Starting the Celery worker server
 ### From CLI
-Set the following environmental variables and then run ESICelery from the CLI.
+
+Set the following environmental variables and then run EVECelery from the CLI.
 Variables: BrokerUser, BrokerPassword, BrokerHost, BrokerPort, BrokerVhost, ResultBackendUser, ResultBackendPassword, ResultBackendHost, ResultBackendPort, ResultBackendDb
 
 ```shell
-python ESICelery
+python EVECelery
 ```
 
 ### From your code
 From your worker code start the Celery worker server that handles running tasks:
 
 ```python
-from ESICelery.CeleryApps import CeleryWorker
+from EVECelery.CeleryApps import CeleryWorker
 
 c = CeleryWorker(broker_user="user", broker_password="pass", broker_host="host", broker_port=5672, broker_vhost="esi",
                  result_user="user", result_password="pass", result_host="host", result_port=6379, result_db=0,
@@ -30,12 +31,12 @@ c.start(
     max_concurrency=10)  # Start celery app - equivalent to running "celery worker -l WARNING --autoscale 10,1 -Q queues"
 ```
 
-## Using ESICelery in your code
+## Using EVECelery in your code
 From another Python script you can send tasks to the queues and receive results:
 
 ```python
-from ESICelery.CeleryApps import CeleryWorker
-from ESICelery.tasks.Universe import *
+from EVECelery.CeleryApps import CeleryWorker
+from EVECelery.tasks.Universe import *
 
 c = CeleryWorker(broker_user="user", broker_password="pass", broker_host="host", broker_port=5672, broker_vhost="esi",
                  result_user="user", result_password="pass", result_host="host", result_port=6379, result_db=0,
@@ -46,7 +47,7 @@ print(r)
 
 # Current supported endpoints
 
-| ESI Route                                    | ESICelery Task        |
+| ESI Route                                    | EVECelery Task        |
 |----------------------------------------------|-----------------------|
 | /alliances/{alliance_id}/                    | AllianceInfo()        |
 | /characters/{character_id}/                  | CharacterPublicInfo() |
@@ -61,8 +62,10 @@ print(r)
 | /universe/types/{type_id}/                   | TypeInfo()            |
 
 # Examples
-See the included example scripts under [docs/examples](https://github.com/EVEInsight/ESICelery/tree/main/docs/examples)
+
+See the included example scripts under [docs/examples](https://github.com/NatEVETools/EVECelery/tree/main/docs/examples)
 
 # Copyright Notice
-See [CCP.md](https://github.com/EVEInsight/ESICelery/blob/main/CCP.md)
+
+See [CCP.md](https://github.com/NatEVETools/EVECelery/blob/main/CCP.md)
 

@@ -23,7 +23,7 @@ jobs:
           pip install -r requirements.txt
       - name: Lint
         run: |
-          flake8 --show-source --statistics --exit-zero ESICelery/ tests/
+          flake8 --show-source --statistics --exit-zero EVECelery/ tests/
       - name: pytest
         run: |
           pytest

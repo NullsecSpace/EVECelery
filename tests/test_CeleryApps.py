@@ -1,6 +1,6 @@
 from tests.TestUtils import *
 import pytest
-from ESICelery.CeleryApps import CeleryWorker
+from EVECelery.CeleryApps import CeleryWorker
 from redis.exceptions import ConnectionError
 from redis.exceptions import AuthenticationError
 

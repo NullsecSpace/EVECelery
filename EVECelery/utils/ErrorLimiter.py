@@ -2,7 +2,7 @@ from redis import Redis
 from datetime import datetime, timedelta
 import json
 from dateutil.parser import parse as dtparse
-from ESICelery.exceptions.utils import ErrorLimitExceeded
+from EVECelery.exceptions.utils import ErrorLimitExceeded
 import socket
 import os
 
@@ -85,7 +85,7 @@ class ErrorLimiter(object):
 
         :param redis: The redis client
         :return: None
-        :raises ESICelery.exceptions.utils.ErrorLimitExceeded: If the remaining error limit is below the allowed threshold.
+        :raises EVECelery.exceptions.utils.ErrorLimitExceeded: If the remaining error limit is below the allowed threshold.
         """
         with redis.lock(cls.get_lock_key(), blocking_timeout=5, timeout=300):
             current_error_info = cls.get_redis(redis)

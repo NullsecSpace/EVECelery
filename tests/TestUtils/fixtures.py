@@ -95,6 +95,6 @@ def server_redis(docker_services_cleanup):
 # @pytest.fixture(scope="function")
 # def celery_config(broker, result_backend):
 #     return {
-#         'broker_url': "amqp://ESICelery:ESICeleryPass@localhost:5672/ESICeleryVHost",
-#         'result_backend': f"redis://default:ESICelery@127.0.0.1:6379/1"
+#         'broker_url': "amqp://EVECelery:EVECeleryPass@localhost:5672/EVECeleryVHost",
+#         'result_backend': f"redis://default:EVECelery@127.0.0.1:6379/1"
 #     }

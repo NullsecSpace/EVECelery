@@ -1,8 +1,8 @@
 import os
 import platform
 import requests
-from ESICelery.exceptions.utils import MissingHeaderEmail
-from ESICelery import __version__
+from EVECelery.exceptions.utils import MissingHeaderEmail
+from EVECelery import __version__
 
 
 class RequestHeaders(object):
@@ -22,7 +22,7 @@ class RequestHeaders(object):
         h = {"Accept":      "application/json",
              "From":        cls.get_email(),
              "Maintainer":  "maintainers@eveinsight.net",
-             "User-Agent": f"ESICelery {__version__} (https://github.com/EVEInsight/ESICelery)"
+             "User-Agent": f"EVECelery {__version__} (https://github.com/NatEVETools/EVECelery)"
                            f"Python/{platform.python_version()} "
                            f"Requests/{requests.__version__}"}
         return h
