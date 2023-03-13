@@ -1,4 +1,7 @@
 # EVECelery
+[![PyPI](https://img.shields.io/pypi/v/EVECelery)](https://pypi.org/project/EVECelery)
+[![EVECelery](https://github.com/NatEVETools/EVECelery/actions/workflows/github-actions.yml/badge.svg)](https://github.com/NatEVETools/EVECelery/actions/workflows/github-actions.yml)
+
 ESI API requests library using [RabbitMQ](https://www.rabbitmq.com/), [celery](https://docs.celeryproject.org/en/stable/getting-started/introduction.html) tasks queues, and [Redis](https://redis.io/) caching.
 
 # Installation
