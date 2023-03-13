@@ -29,6 +29,8 @@ jobs:
           pytest
   publish-pypi-package:
     needs: test
+    environment: 
+      name: Production
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
