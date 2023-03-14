@@ -10,5 +10,5 @@ flake8
 pytest-celery
 pytest~=7.2.0
 docker~=6.0.1
-sphinx
-sphinx-autoapi
+sphinx~=6.1.3
+sphinx-autoapi~=2.0.1
