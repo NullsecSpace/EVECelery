@@ -1,5 +1,6 @@
 # EVECelery
 [![PyPI](https://img.shields.io/pypi/v/EVECelery)](https://pypi.org/project/EVECelery)
+[![Documentation Status](https://readthedocs.org/projects/evecelery/badge/?version=latest)](https://evecelery.readthedocs.io/en/latest/?badge=latest)
 [![EVECelery](https://github.com/NatEVETools/EVECelery/actions/workflows/github-actions.yml/badge.svg)](https://github.com/NatEVETools/EVECelery/actions/workflows/github-actions.yml)
 [![GitHub](https://img.shields.io/github/license/NatEVETools/EVECelery)](https://github.com/NatEVETools/EVECelery/blob/main/LICENSE)
 
