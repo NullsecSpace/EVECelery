@@ -3,4 +3,4 @@ __description__ = 'Task queue framework for building tools that interact with th
 __license__ = 'MIT License'
 __title__ = 'EVECelery'
 __url__ = 'https://github.com/NatEVETools/EVECelery'
-__version__ = '0.16'
+__version__ = '0.17'
