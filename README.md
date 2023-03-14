@@ -1,8 +1,12 @@
 # EVECelery
 [![PyPI](https://img.shields.io/pypi/v/EVECelery)](https://pypi.org/project/EVECelery)
 [![EVECelery](https://github.com/NatEVETools/EVECelery/actions/workflows/github-actions.yml/badge.svg)](https://github.com/NatEVETools/EVECelery/actions/workflows/github-actions.yml)
+[![GitHub](https://img.shields.io/github/license/NatEVETools/EVECelery)](https://github.com/NatEVETools/EVECelery/blob/main/LICENSE)
 
-ESI API requests library using [RabbitMQ](https://www.rabbitmq.com/), [celery](https://docs.celeryproject.org/en/stable/getting-started/introduction.html) tasks queues, and [Redis](https://redis.io/) caching.
+EVECelery is a task queue framework for building tools that interact with the [EVE Online ESI API](https://esi.evetech.net/ui) using Celery, RabbitMQ, and Redis.
+
+With EVECelery you can easily distribute ESI calls through task queues built on top of [Celery](https://docs.celeryq.dev/) across a fleet of worker nodes.
+You can build on top of EVECelery to create your own custom ESI tools defining your own tasks and scheduled jobs.
 
 # Installation
 ```
