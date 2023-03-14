@@ -28,5 +28,10 @@ setuptools.setup(name='EVECelery',
                      'requests~=2.27',
                      'pydantic~=1.10'
                  ],
-                 python_requires=">=3.7"
+                 python_requires=">=3.7",
+                 entry_points={
+                     'console_scripts': [
+                         'eve-celery = EVECelery:main'
+                     ]
+                 }
                  )

@@ -21,7 +21,7 @@ Set the following environmental variables and then run EVECelery from the CLI.
 Variables: BrokerUser, BrokerPassword, BrokerHost, BrokerPort, BrokerVhost, ResultBackendUser, ResultBackendPassword, ResultBackendHost, ResultBackendPort, ResultBackendDb
 
 ```shell
-python EVECelery
+eve-celery
 ```
 
 ### From your code
