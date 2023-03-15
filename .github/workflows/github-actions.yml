@@ -2,7 +2,7 @@ name: EVECelery
 on: [push]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.sha }}
   cancel-in-progress: true
 
 env:
@@ -33,6 +33,7 @@ jobs:
           pytest
   publish-pypi-package:
     needs: test
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     environment: 
       name: Production
     runs-on: ubuntu-latest
@@ -51,7 +52,6 @@ jobs:
         run: |
           python -m build
       - name: Publish to PyPI
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
