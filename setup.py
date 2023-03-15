@@ -18,7 +18,12 @@ setuptools.setup(name='EVECelery',
                  long_description=long_description,
                  long_description_content_type="text/markdown",
                  author_email=pkg_info['__author_email__'],
-                 url=pkg_info['__url__'],
+                 url='https://github.com/NullsecSpace/EVECelery',
+                 project_urls={
+                     'Documentation': 'https://EVECelery.nullsec.space',
+                     'Source': 'https://github.com/NullsecSpace/EVECelery',
+                     'Tracker': 'https://github.com/NullsecSpace/EVECelery/issues',
+                 },
                  packages=setuptools.find_packages(include=["EVECelery", "EVECelery.*"]),
                  install_requires=[
                      'Celery~=5.2',
@@ -33,5 +38,13 @@ setuptools.setup(name='EVECelery',
                      'console_scripts': [
                          'eve-celery = EVECelery:main'
                      ]
-                 }
+                 },
+                 classifiers=[
+                     'Development Status :: 2 - Pre-Alpha',
+                     'Programming Language :: Python :: 3.10',
+                     'Topic :: Games/Entertainment',
+                     'License :: OSI Approved :: MIT License',
+
+                 ],
+                 keywords='eve online rabbitmq esi redis message queue broker'
                  )

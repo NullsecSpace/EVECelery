@@ -21,8 +21,8 @@ class RequestHeaders(object):
     def get_headers(cls) -> dict:
         h = {"Accept":      "application/json",
              "From":        cls.get_email(),
-             "Maintainer":  "maintainers@eveinsight.net",
-             "User-Agent": f"EVECelery {__version__} (https://github.com/NatEVETools/EVECelery)"
+             "Maintainer":  "maintainers@nullsec.space",
+             "User-Agent": f"EVECelery {__version__} (https://github.com/NullsecSpace/EVECelery)"
                            f"Python/{platform.python_version()} "
                            f"Requests/{requests.__version__}"}
         return h

@@ -1,6 +1,6 @@
-__author_email__ = 'maintainers@eveinsight.net'
+__author_email__ = 'maintainers@nullsec.space'
 __description__ = 'Task queue framework for building tools that interact with the EVE Online ESI API using Celery, RabbitMQ, and Redis.'
 __license__ = 'MIT License'
 __title__ = 'EVECelery'
-__url__ = 'https://github.com/NatEVETools/EVECelery'
+__url__ = 'https://github.com/NullsecSpace/EVECelery'
 __version__ = '0.18'
