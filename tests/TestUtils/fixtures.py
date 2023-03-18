@@ -3,6 +3,7 @@ import docker
 import datetime as dt
 import time
 import random
+from EVECelery.utils.Singleton import Singleton
 
 
 @pytest.fixture(scope="session")
@@ -52,7 +53,7 @@ def server_rabbitmq(docker_services_cleanup):
         c.reload()
         if c.status == 'running' and 'Server startup complete' in str(c.logs(stream=False)):
             break
-        if dt.datetime.utcnow() >= start + dt.timedelta(seconds=10):
+        if dt.datetime.utcnow() >= start + dt.timedelta(seconds=20):
             c.kill()
             raise Exception('RabbitMQ server container failed to start within the required time limit.')
         time.sleep(.25)
@@ -85,12 +86,17 @@ def server_redis(docker_services_cleanup):
         c.reload()
         if c.status == 'running' and 'Ready to accept connections' in str(c.logs(stream=False)):
             break
-        if dt.datetime.utcnow() >= start + dt.timedelta(seconds=10):
+        if dt.datetime.utcnow() >= start + dt.timedelta(seconds=20):
             c.kill()
             raise Exception('Redis server container failed to start within the required time limit.')
         time.sleep(.25)
     yield d
     c.kill()
+
+
+@pytest.fixture(scope='function', autouse=True)
+def delete_singletons():
+    Singleton.clear_instance_references()
 
 # @pytest.fixture(scope="function")
 # def celery_config(broker, result_backend):

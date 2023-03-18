@@ -2,7 +2,6 @@ from EVECelery.exceptions.tasks import NotResolved, InputValidationError
 from EVECelery.exceptions.utils import ErrorLimitExceeded
 from EVECelery.utils.ErrorLimiter import ESIErrorLimiter
 from EVECelery.utils.RequestHeaders import RequestHeaders
-from redis import Redis
 from celery.result import AsyncResult
 import json
 import requests

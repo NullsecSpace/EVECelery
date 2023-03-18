@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import BaseModel
 import traceback
 from .BaseClient import BaseClient
+from EVECelery.utils.Singleton import Singleton
 
 
 class ConfigRabbitMQ(BaseModel):
@@ -14,7 +15,7 @@ class ConfigRabbitMQ(BaseModel):
     vhost: str
 
 
-class ClientRabbitMQ(BaseClient):
+class ClientRabbitMQ(BaseClient, metaclass=Singleton):
     """
 
     :param user: RabbitMQ user

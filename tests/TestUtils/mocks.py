@@ -13,6 +13,16 @@ def fake_rabbitmq_connection_vars() -> dict:
     }
 
 
+def fake_redis_connection_vars() -> dict:
+    return {
+        'EVECelery_Redis_ResultBackend_User': 'user',
+        'EVECelery_Redis_ResultBackend_Password': 'pass',
+        'EVECelery_Redis_ResultBackend_Host': 'localhost',
+        'EVECelery_Redis_ResultBackend_Port': random.randint(16000, 17000),
+        'EVECelery_Redis_ResultBackend_DB': 1
+    }
+
+
 @pytest.fixture(scope='function')
 def mock_env_no_servers(monkeypatch):
     """
@@ -20,11 +30,7 @@ def mock_env_no_servers(monkeypatch):
     """
     env_vars = {
         **fake_rabbitmq_connection_vars(),
-        'EVECelery_Redis_ResultBackend_User': 'user',
-        'EVECelery_Redis_ResultBackend_Password': 'pass',
-        'EVECelery_Redis_ResultBackend_Host': 'localhost',
-        'EVECelery_Redis_ResultBackend_Port': random.randint(16000, 17000),
-        'EVECelery_Redis_ResultBackend_DB': 1
+        **fake_redis_connection_vars()
     }
     for k, v in env_vars.items():
         monkeypatch.setenv(k, v)

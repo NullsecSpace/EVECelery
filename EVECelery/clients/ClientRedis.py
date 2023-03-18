@@ -2,6 +2,7 @@ import os
 import sys
 from typing import Optional
 from pydantic import BaseModel, validator
+from EVECelery.utils.Singleton import Singleton
 import traceback
 import redis
 
@@ -20,7 +21,7 @@ class ConfigRedis(BaseModel):
         return v
 
 
-class ClientRedis:
+class ClientRedis(metaclass=Singleton):
     """
 
     :param user: Redis user
@@ -32,17 +33,16 @@ class ClientRedis:
 
     def __init__(self, user: str, password: str, host: str, port: int, db: int):
         self.config = ConfigRedis(user=user, password=password, host=host, port=port, db=db)
-        self._redis = redis.Redis(username=self.config.user,
-                                  host=self.config.host,
-                                  port=self.config.port,
-                                  db=self.config.db,
-                                  password=self.config.password)
+        self._redis = None
 
     def check_connection(self) -> bool:
         return self.redis.ping()
 
     @property
     def redis(self) -> redis.Redis:
+        if self._redis is None:
+            self._redis = redis.Redis(username=self.config.user, host=self.config.host, port=self.config.port,
+                                      db=self.config.db, password=self.config.password, socket_timeout=10)
         return self._redis
 
     @property
