@@ -4,23 +4,32 @@
 [![EVECelery](https://github.com/NullsecSpace/EVECelery/actions/workflows/github-actions.yml/badge.svg)](https://github.com/NullsecSpace/EVECelery/actions/workflows/github-actions.yml)
 [![GitHub](https://img.shields.io/github/license/NullsecSpace/EVECelery)](https://github.com/NullsecSpace/EVECelery/blob/main/LICENSE)
 
-EVECelery is a distributed task queue framework for building tools that interact with the [EVE Online ESI API](https://esi.evetech.net/ui) using Celery, RabbitMQ, and Redis.
+EVECelery is a distributed task queue framework for building tools that interact with
+the [EVE Online ESI API](https://esi.evetech.net/ui) using Celery, RabbitMQ, and Redis.
 
-With EVECelery you can easily distribute ESI calls across task queues built on top of [Celery](https://docs.celeryq.dev/) with a fleet of worker nodes.
+With EVECelery you can easily distribute ESI calls across task queues built on top
+of [Celery](https://docs.celeryq.dev/) with a fleet of worker nodes.
 You can build on top of EVECelery to create your own tools defining custom tasks and scheduled jobs.
 
 NOTE: This software is in development and may rapidly change or have breaking bugs until the v1.0 release is ready.
 Ensure you use version pinning in your ```requirements.txt```.
 
+- :books: Documentation: https://evecelery.nullsec.space
+- :bulb: Examples: https://evecelery.nullsec.space/en/latest/examples/index.html
+
 # Installation
+
 ```
 pip install EVECelery
 ```
 
 # Requirements
-EVECelery requires RabbitMQ for the message broker service and Redis for distributed locks, cache, and Celery's result backend (fetching the result of completed tasks).
 
-Deploying these two servers through the official Docker images for [RabbitMQ](https://hub.docker.com/_/rabbitmq) and [Redis](https://hub.docker.com/_/redis) is recommended.
+EVECelery requires RabbitMQ for the message broker service and Redis for distributed locks, cache, and Celery's result
+backend (fetching the result of completed tasks).
+
+Deploying these two servers through the official Docker images for [RabbitMQ](https://hub.docker.com/_/rabbitmq)
+and [Redis](https://hub.docker.com/_/redis) is recommended.
 
 # Quickstart and Usage
 EVECelery has two components:

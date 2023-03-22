@@ -26,13 +26,39 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
 html_static_path = ['_static']
 
+html_title = "EVECelery Docs"
+html_context = {
+    "default_mode": "dark",
+    "github_user": "NullsecSpace",
+    "github_repo": "EVECelery",
+    "github_version": "main",
+    "doc_path": "docs",
+}
 html_theme_options = {
-    'collapse_navigation': True,
-    'sticky_navigation': True,
-    'navigation_depth': 4,
-    'includehidden': True,
-    'titles_only': False
+    "use_edit_page_button": True,
+    "show_nav_level": 2,
+    "navigation_depth": 4,
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/NullsecSpace/EVECelery",
+            "icon": "fa-brands fa-square-github",
+            "type": "fontawesome",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/EVECelery",
+            "icon": "fa-solid fa-box",
+            "type": "fontawesome",
+        },
+        {
+            "name": "NullsecSpace",
+            "url": "https://nullsec.space",
+            "icon": "fa-solid fa-star",
+            "type": "fontawesome",
+        }
+    ]
 }
