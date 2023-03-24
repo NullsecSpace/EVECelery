@@ -10,7 +10,7 @@ class RequestHeaders(object):
     def get_email(cls):
         email = os.environ.get('EVECelery_Email')
         if email is None:
-            raise MissingHeaderEmail("Missing 'header_email' variable. "
+            raise MissingHeaderEmail("Missing 'EVECelery_Email' variable. "
                                      "Please set this variable to your email address so ESI and ZK APIs "
                                      "can contact you if there are problems. "
                                      "Requests to ESI or ZK will not occur until this field is set.")

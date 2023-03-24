@@ -3,9 +3,6 @@ from EVECelery.exceptions.tasks import InputValidationError
 
 
 class Route(ESIRequest):
-    def get_key(self, origin: int, destination: int):
-        return f"Route-{origin}-{destination}"
-
     def route(self, origin: int, destination: int):
         return f"/route/{origin}/{destination}"
 

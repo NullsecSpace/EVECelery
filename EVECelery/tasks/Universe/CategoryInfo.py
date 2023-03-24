@@ -3,9 +3,6 @@ from EVECelery.exceptions.tasks import InputValidationError
 
 
 class CategoryInfo(ESIRequest):
-    def get_key(self, category_id: int):
-        return f"CategoryInfo-{category_id}"
-
     def route(self, category_id: int):
         return f"/universe/categories/{category_id}"
 

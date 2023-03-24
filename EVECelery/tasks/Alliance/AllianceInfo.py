@@ -6,9 +6,6 @@ class AllianceInfo(ESIRequest):
     def ttl_404(self) -> int:
         return 3600  # current esi x-cached-seconds header
 
-    def get_key(self, alliance_id: int):
-        return f"AllianceInfo-{alliance_id}"
-
     def route(self, alliance_id: int):
         return f"/alliances/{alliance_id}"
 
