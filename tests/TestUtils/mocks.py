@@ -1,6 +1,8 @@
 import pytest
 import random
 from .fixtures import server_rabbitmq, server_redis
+from EVECelery.tasks.Alliance import *
+from EVECelery.tasks.Samples import *
 
 
 def fake_rabbitmq_connection_vars() -> dict:
@@ -75,3 +77,24 @@ def mock_env_redis(monkeypatch, server_redis):
     for k, v in env_vars.items():
         monkeypatch.setenv(k, v)
     yield env_vars
+
+
+@pytest.fixture(scope='function')
+def celery_config(mock_env_rabbitmq_redis):
+    return {
+        'broker_url': f"amqp://{mock_env_rabbitmq_redis['EVECelery_RabbitMQ_User']}:{mock_env_rabbitmq_redis['EVECelery_RabbitMQ_Password']}@{mock_env_rabbitmq_redis['EVECelery_RabbitMQ_Host']}:{mock_env_rabbitmq_redis['EVECelery_RabbitMQ_Port']}/{mock_env_rabbitmq_redis['EVECelery_RabbitMQ_Vhost']}",
+        'result_backend': f"redis://{mock_env_rabbitmq_redis['EVECelery_Redis_ResultBackend_User']}:{mock_env_rabbitmq_redis['EVECelery_Redis_ResultBackend_Password']}@{mock_env_rabbitmq_redis['EVECelery_Redis_ResultBackend_Host']}:{mock_env_rabbitmq_redis['EVECelery_Redis_ResultBackend_Port']}/{mock_env_rabbitmq_redis['EVECelery_Redis_ResultBackend_DB']}"
+    }
+
+
+@pytest.fixture(scope='function')
+def celery_register_tasks(celery_config, celery_app):
+    celery_app.register_task(AllianceInfo())
+    celery_app.register_task(CachedAddTask())
+    return celery_app
+
+
+@pytest.fixture(scope='function')
+def mock_env_celery(monkeypatch, celery_register_tasks, celery_worker):
+    monkeypatch.setenv('EVECelery_Email', 'testsuite@nullsec.space')
+    yield

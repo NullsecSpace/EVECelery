@@ -1,10 +1,9 @@
-from EVECelery.exceptions.tasks import NotCached
 from EVECelery.utils.ErrorLimiter import ESIErrorLimiter
 from EVECelery.utils.RequestHeaders import RequestHeaders
-import json
 import requests
 from datetime import datetime
 from dateutil.parser import parse as dtparse
+from typing import Union, Tuple
 from .CachedTask import CachedTask
 
 
@@ -43,16 +42,7 @@ class ESIRequest(CachedTask):
         """
         return f"{self.base_url()}{self.route(**kwargs)}/?datasource=tranquility"
 
-    def run(self, *args, **kwargs):
-        """
-        The task body
-        """
-        try:
-            return super().run(*args, **kwargs)
-        except NotCached:
-            return self._request_esi(**kwargs)
-
-    def _request_esi(self, **kwargs):
+    def _run_get_result(self, **kwargs) -> Tuple[Union[list, str, dict], int]:
         """Gets the ESI cached response.
         If the response is not yet cached or hasn't been resolved then perform an ESI call caching the new response.
 
@@ -70,47 +60,40 @@ class ESIRequest(CachedTask):
         :rtype: dict or list
         :raises EVECelery.exceptions.utils.ErrorLimitExceeded: If the remaining error limit is below the allowed threshold.
         """
-        lookup_key = self.get_redis_response_key(**kwargs)
-        lock_key = self.get_redis_lock_key(**kwargs)
-        with self.redis_locks.lock(lock_key, blocking_timeout=15, timeout=300):
-            ESIErrorLimiter.check_limit(self.redis_cache)
-            rheaders = {}
+        ESIErrorLimiter.check_limit(self.redis_cache)
+        rheaders = {}
+        try:
+            resp = requests.get(self.request_url(**kwargs), headers=RequestHeaders.get_headers(),
+                                timeout=5, verify=True)
+            rheaders = resp.headers
+            if resp.status_code == 200:
+                d = resp.json()
+                ttl_expire = int(max(
+                    (dtparse(rheaders["expires"], ignoretz=True) - datetime.utcnow()).total_seconds(),
+                    1)
+                )
+                ESIErrorLimiter.update_limit(self.redis_cache,
+                                             error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
+                                             error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
+                                             time=dtparse(rheaders["date"], ignoretz=True)
+                                             )
+                return d, ttl_expire
+            elif resp.status_code == 400 or resp.status_code == 404:
+                ESIErrorLimiter.update_limit(self.redis_cache,
+                                             error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
+                                             error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
+                                             time=dtparse(rheaders["date"], ignoretz=True)
+                                             )
+                return {"error": str(resp.json().get("error")), "error_code": resp.status_code}, self.ttl_404()
+            else:
+                resp.raise_for_status()
+        except Exception as ex:
             try:
-                resp = requests.get(self.request_url(**kwargs), headers=RequestHeaders.get_headers(),
-                                    timeout=5, verify=True)
-                rheaders = resp.headers
-                if resp.status_code == 200:
-                    d = resp.json()
-                    ttl_expire = int(max(
-                        (dtparse(rheaders["expires"], ignoretz=True) - datetime.utcnow()).total_seconds(),
-                        1)
-                    )
-                    self.redis_cache.set(name=lookup_key, value=json.dumps(d), ex=ttl_expire)
-                    ESIErrorLimiter.update_limit(self.redis_cache,
-                                                 error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
-                                                 error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
-                                                 time=dtparse(rheaders["date"], ignoretz=True)
-                                                 )
-                    return json.loads(self.redis_cache.get(lookup_key))
-                elif resp.status_code == 400 or resp.status_code == 404:
-                    d = {"error": str(resp.json().get("error")), "error_code": resp.status_code}
-                    self.redis_cache.set(name=lookup_key, value=json.dumps(d), ex=self.ttl_404())
-                    ESIErrorLimiter.update_limit(self.redis_cache,
-                                                 error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
-                                                 error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
-                                                 time=dtparse(rheaders["date"], ignoretz=True)
-                                                 )
-                    return json.loads(self.redis_cache.get(lookup_key))
-                else:
-                    resp.raise_for_status()
-            except Exception as ex:
-                try:
-                    ESIErrorLimiter.update_limit(self.redis_cache,
-                                                 error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
-                                                 error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
-                                                 time=dtparse(rheaders["date"], ignoretz=True)
-                                                 )
-                except KeyError:
-                    ESIErrorLimiter.decrement_limit(self.redis_cache, datetime.utcnow())
-                raise ex
-
+                ESIErrorLimiter.update_limit(self.redis_cache,
+                                             error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
+                                             error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
+                                             time=dtparse(rheaders["date"], ignoretz=True)
+                                             )
+            except KeyError:
+                ESIErrorLimiter.decrement_limit(self.redis_cache, datetime.utcnow())
+            raise ex

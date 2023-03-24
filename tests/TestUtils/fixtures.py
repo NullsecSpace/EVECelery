@@ -1,3 +1,5 @@
+import os
+
 import pytest
 import docker
 import datetime as dt
@@ -98,9 +100,9 @@ def server_redis(docker_services_cleanup):
 def delete_singletons():
     Singleton.clear_instance_references()
 
-# @pytest.fixture(scope="function")
-# def celery_config(broker, result_backend):
-#     return {
-#         'broker_url': "amqp://EVECelery:EVECeleryPass@localhost:5672/EVECeleryVHost",
-#         'result_backend': f"redis://default:EVECelery@127.0.0.1:6379/1"
-#     }
+
+@pytest.fixture(scope='function', autouse=True)
+def delete_env_vars(monkeypatch):
+    for k in os.environ.keys():
+        if k.upper().startswith('EVECELERY'):
+            monkeypatch.delenv(k)

@@ -1,5 +1,5 @@
 import json
-from typing import Union
+from typing import Union, Tuple
 import hashlib
 from .BaseTask import BaseTask
 from EVECelery.clients.ClientRedis import ClientRedisLocks, ClientRedisCache
@@ -44,6 +44,12 @@ class CachedTask(BaseTask):
         k = self.get_redis_response_key(**kwargs)
         return f"Lock-{k}"
 
+    def cache_key_exists(self, **kwargs) -> bool:
+        """
+        Check if cache key exists for given input
+        """
+        return self.redis_cache.exists(self.get_redis_response_key(**kwargs)) >= 1
+
     def validate_inputs(self, **kwargs) -> None:
         """Run validation checks before continuing a task run or checking the cache.
 
@@ -52,7 +58,7 @@ class CachedTask(BaseTask):
         :raises EVECelery.exceptions.tasks.InputValidationError: If an input task parameter contains
             invalid syntax
         """
-        raise NotImplementedError
+        pass
 
     def get_cached(self, **kwargs) -> Union[list, str, dict]:
         """Get the cached response with the task request parameters from Redis if it exists.
@@ -69,9 +75,21 @@ class CachedTask(BaseTask):
         else:
             raise NotCached
 
-    def run(self, *args, **kwargs) -> Union[list, str, dict]:
+    def run(self, **kwargs) -> Union[list, str, dict]:
         """
         Check that cache first for a result. #todo more docs
         """
         with self.redis_locks.lock(self.get_redis_lock_key(**kwargs), blocking_timeout=15, timeout=300):
-            return self.get_cached(**kwargs)
+            try:
+                return self.get_cached(**kwargs)
+            except NotCached:
+                response, ttl = self._run_get_result(**kwargs)
+                self.redis_cache.set(name=self.get_redis_response_key(**kwargs), value=json.dumps(response), ex=ttl)
+                return response
+
+    def _run_get_result(self, **kwargs) -> Tuple[Union[list, str, dict], int]:
+        """
+        Run method called by task if the result is not cached.
+        :return: A tuple with of (response, cache_ttl)
+        """
+        raise NotImplementedError
