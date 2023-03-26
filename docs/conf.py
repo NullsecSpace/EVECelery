@@ -41,6 +41,7 @@ html_theme_options = {
     "use_edit_page_button": True,
     "show_nav_level": 2,
     "navigation_depth": 4,
+    "announcement": "This library is in development and may rapidly change or have breaking bugs until the v1.0 release is ready.",
     "icon_links": [
         {
             "name": "GitHub",
