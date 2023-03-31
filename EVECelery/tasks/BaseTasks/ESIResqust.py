@@ -8,11 +8,20 @@ from .CachedTask import CachedTask
 
 
 class ESIRequest(CachedTask):
-    def ttl_404(self) -> int:
-        """Returns the redis TTL for caching ESI responses that errored with a 404 - not found
+    def request_method(self) -> str:
+        """
+        Returns the type of request made to ESI
 
-        :return: Seconds to cache a 404 not found ESI response in Redis
-        :rtype: int
+        This method will return the request method (get, post, etc.) made to ESI.
+        :return: Request method passed to requests.request()
+        """
+        return 'get'
+
+    def ttl_404(self) -> int:
+        """
+        TTL for when cache is unspecified.
+
+        :return: The number of seconds to cache a response
         """
         return 86400
 
@@ -40,7 +49,7 @@ class ESIRequest(CachedTask):
         :return: ESI request URL with request parameters
         :rtype: str
         """
-        return f"{self.base_url()}{self.route(**kwargs)}/?datasource=tranquility"
+        return f"{self.base_url()}{self.route(**kwargs)}"
 
     def _run_get_result(self, **kwargs) -> Tuple[Union[list, str, dict], int]:
         """Gets the ESI cached response.
@@ -63,8 +72,7 @@ class ESIRequest(CachedTask):
         ESIErrorLimiter.check_limit(self.redis_cache)
         rheaders = {}
         try:
-            resp = requests.get(self.request_url(**kwargs), headers=RequestHeaders.get_headers(),
-                                timeout=5, verify=True)
+            resp = requests.request(self.request_method(), self.request_url(**kwargs), headers=RequestHeaders.get_headers(), timeout=5, verify=True)
             rheaders = resp.headers
             if resp.status_code == 200:
                 d = resp.json()

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, validator, Field
 import warnings
-from typing import Iterator
+from typing import Iterator, Literal
 
 
 def resolve_json_ref(full_dict: dict, input_dict: dict):
@@ -51,6 +51,10 @@ class ModelProperty(BaseModel):
             return f'{self.name}: {self.type}'
         else:
             return f'{self.name}: {self.type} | None = None'
+
+    @property
+    def param_pass(self):
+        return f'{self.name}={self.name}'
 
     @property
     def function_docstring(self):
@@ -106,6 +110,7 @@ class ModelResponse(BaseModel):
 
 
 class ModelPath(BaseModel):
+    method: Literal['get', 'post', 'delete']
     class_name: str
     path: str
     summary: str = 'No summary provided.'
@@ -130,19 +135,23 @@ class ModelPath(BaseModel):
         return self.tags[0] if len(self.tags) >= 1 else 'uncategorized'
 
     @property
-    def pathParams(self) -> Iterator[ModelProperty]:
+    def pathParams(self) -> list[ModelProperty]:
+        return_items = []
         for p in self.parameters:
             if p.pathParam:
-                yield p
+                return_items.append(p)
+        return return_items
 
     @property
-    def requestParams(self) -> Iterator[ModelProperty]:
+    def requestParams(self) -> list[ModelProperty]:
+        return_items = []
         for p in self.parameters:
             if not p.headerParam:
-                yield p
+                return_items.append(p)
+        return return_items
 
     @classmethod
-    def parse_swagger(cls, full_swagger_dict: dict, path_dict: dict, path_str: str):
+    def parse_swagger(cls, full_swagger_dict: dict, path_dict: dict, path_str: str, method: str):
         # responses
         responses_success = {}
         response_success_codes = [c for c in path_dict.get('responses').keys() if 200 <= int(c) < 300]
@@ -159,7 +168,8 @@ class ModelPath(BaseModel):
             model_param = ModelProperty.parse_swagger(resolve_json_ref(full_swagger_dict, src_param_item))
             parameters.append(model_param)
 
-        return cls(class_name=path_dict.get('operationId'),
+        return cls(method=method,
+                   class_name=path_dict.get('operationId'),
                    summary=path_dict.get('summary'),
                    description=path_dict.get('description'),
                    path=path_str,

@@ -1,6 +1,7 @@
 from jinja2 import Environment, FileSystemLoader, select_autoescape, StrictUndefined
 import json
 from Models import *
+import warnings
 
 
 class GenerateAPI:
@@ -20,15 +21,16 @@ class GenerateAPI:
     def generate_template_models(self):
         for path_str, path in self.esi_schema['paths'].items():
             for method, d in path.items():
-                if method == 'get':
-                    m = ModelPath.parse_swagger(self.esi_schema, d, path_str)
+                try:
+                    m = ModelPath.parse_swagger(self.esi_schema, d, path_str, method)
                     self.template_models.append(m)
-                else:
-                    pass  # todo not implemented
+                except Exception as ex:
+                    msg = f'Template generation for {method}->{path_str} was skipped due to exception: {ex}'
+                    warnings.warn(msg)
 
     def render_templates(self):
         for m in self.template_models:
-            t = self.template_env.get_template('ESI_Get_Request.py')
+            t = self.template_env.get_template('ESI_Task.py')
             m_rendered = t.render(m=m)
             package = m.package
             if not isinstance(self.templates_rendered.get(package), dict):
