@@ -6,6 +6,7 @@ requests~=2.27
 pydantic~=1.10
 
 # dev requirements
+Jinja2~=3.1.2
 flake8
 pytest-celery
 pytest~=7.2.0
