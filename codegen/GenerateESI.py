@@ -12,6 +12,8 @@ class GenerateAPI:
                                         undefined=StrictUndefined)
         self.template_models: list[ModelPath] = []
         self.templates_rendered: dict[str, str] = {}
+        self.total_templates_success = 0
+        self.total_templates_fail = 0
 
     @classmethod
     def get_swagger_spec(cls, url: str = None) -> dict:
@@ -27,6 +29,7 @@ class GenerateAPI:
                 except Exception as ex:
                     msg = f'Template generation for {method}->{path_str} was skipped due to exception: {ex}'
                     warnings.warn(msg)
+                    self.total_templates_fail += 1
 
     def render_templates(self):
         for m in self.template_models:
@@ -39,10 +42,15 @@ class GenerateAPI:
                 raise ValueError(f'Package cannot contain duplicated class names. "{m.class_name}" is duplicated')
             else:
                 self.templates_rendered[package][m.class_name] = m_rendered
+                self.total_templates_success += 1
+
+    def print_summary(self):
+        print(f'Total templates rendered successfully: {self.total_templates_success}\n'
+              f'Total templates that failed to render / skipped: {self.total_templates_fail}')
 
     @classmethod
     def run(cls):
         g = cls()
         g.generate_template_models()
         g.render_templates()
-        print('done')
+        g.print_summary()

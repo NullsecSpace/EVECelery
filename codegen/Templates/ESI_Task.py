@@ -3,6 +3,32 @@ from EVECelery.exceptions.tasks import InputValidationError
 from pydantic import BaseModel, Field, validate_arguments
 from typing import Union
 
+{% for r in m.responses_success -%}
+class ModelResponseHeaders{{ r.code }}(BaseModel):
+    """
+    Headers for response code {{ r.code }}
+    """
+
+    {% for p in r.header_properties -%}
+    {{ p.pydantic_field }}
+    {% endfor %}
+
+class ModelResponse{{r.code}}(BaseModel):
+    """
+    {{ r.description | indent(width=4)}}
+
+    Response for response code {{ r.code }}. This is the response body model that also contains the headers.
+
+    -----Example responses:
+    {{ r.example | indent(width=4)}}
+
+    """
+    headers: ModelResponseHeaders{{ r.code }} = Field(..., description='The response headers for this request.')
+    {% for p in r.body_properties -%}
+    {{p.pydantic_field}}
+    {% endfor %}
+{% endfor %}
+
 
 class {{ m.class_name }}(ESIRequest):
     """

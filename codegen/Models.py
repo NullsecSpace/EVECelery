@@ -1,6 +1,7 @@
 from pydantic import BaseModel, validator, Field
 import warnings
-from typing import Iterator, Literal
+from typing import Literal
+import json
 
 
 def resolve_json_ref(full_dict: dict, input_dict: dict):
@@ -35,7 +36,7 @@ def extract_type(d: dict):
 class ModelProperty(BaseModel):
     name: str
     type: str
-    paramLocation: str
+    paramLocation: str = ''
     description: str = 'No description available.'
     required: bool = False
     default_value: str | None = None
@@ -105,8 +106,45 @@ class ModelProperty(BaseModel):
 
 class ModelResponse(BaseModel):
     code: int
+    example: str = 'No example provided'
+    description: str = 'No description provided'
     body_properties: list[ModelProperty] = Field(default_factory=list)
     header_properties: list[ModelProperty] = Field(default_factory=list)
+
+    @classmethod
+    def parse_swagger(cls, code: int, d: dict):
+        headers_properties = []
+        for p_name, p_dict in d.get('headers', {}).items():
+            m = ModelProperty(name=p_name,
+                              type=extract_type(p_dict),
+                              description=p_dict.get('description')
+                              )
+            headers_properties.append(m)
+        body_properties = []
+        body_schema = d.get('schema', {})
+        if body_schema.get('type') == 'object':
+            for p_name, p_dict in body_schema.get('properties').items():
+                m = ModelProperty(name=p_name,
+                                  type=extract_type(p_dict),
+                                  description=p_dict.get('description'),
+                                  required=p_name in body_schema.get('required', [])
+                                  )
+                body_properties.append(m)
+        elif body_schema.get('type') == 'array':
+            m = ModelProperty(name='items',
+                              type=extract_type(d),
+                              description=body_schema.get('title')
+                              )
+            body_properties.append(m)
+        else:
+            raise TypeError(f"Unknown starting type {body_schema.get('type')}")
+
+        return cls(code=code,
+                   example=json.dumps(d.get('examples', {}).get('application/json', {}), indent=2),
+                   description=d.get('description'),
+                   header_properties=headers_properties,
+                   body_properties=body_properties
+                   )
 
 
 class ModelPath(BaseModel):
@@ -117,7 +155,7 @@ class ModelPath(BaseModel):
     description: str = 'No description provided.'
     default_cache_ttl: int
     parameters: list[ModelProperty] = Field(default_factory=list, description='Input parameters to function call')
-    responses_success: dict[int, ModelResponse]
+    responses_success: list[ModelResponse] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
 
     @validator('default_cache_ttl', pre=True, always=True)
@@ -153,14 +191,14 @@ class ModelPath(BaseModel):
     @classmethod
     def parse_swagger(cls, full_swagger_dict: dict, path_dict: dict, path_str: str, method: str):
         # responses
-        responses_success = {}
+        responses_success = []
         response_success_codes = [c for c in path_dict.get('responses').keys() if 200 <= int(c) < 300]
         if len(response_success_codes) == 0:
             raise ValueError('Expected at least one success response code')
         else:
             for success_code in response_success_codes:
                 r = path_dict['responses'][success_code]
-                # todo
+                responses_success.append(ModelResponse.parse_swagger(success_code, r))
 
         # inputs
         parameters = []
