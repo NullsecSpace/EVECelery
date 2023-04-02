@@ -2,6 +2,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape, StrictUndef
 import json
 from Models import *
 import warnings
+import black
 
 
 class GenerateAPI:
@@ -35,6 +36,11 @@ class GenerateAPI:
         for m in self.template_models:
             t = self.template_env.get_template('ESI_Task.py')
             m_rendered = t.render(m=m)
+            m_rendered = black.format_str(m_rendered, mode=black.Mode(
+                target_versions={black.TargetVersion.PY310},
+                is_pyi=False,
+                string_normalization=False
+            ))
             package = m.package
             if not isinstance(self.templates_rendered.get(package), dict):
                 self.templates_rendered[package] = {}

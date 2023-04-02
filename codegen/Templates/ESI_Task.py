@@ -4,28 +4,33 @@ from pydantic import BaseModel, Field, validate_arguments
 from typing import Union
 
 {% for r in m.responses_success -%}
-class ModelResponseHeaders{{ r.code }}(BaseModel):
+class ResponseHeaders{{ r.code }}(BaseModel):
     """
     Headers for response code {{ r.code }}
     """
 
     {% for p in r.header_properties -%}
     {{ p.pydantic_field }}
+    {% else %}
+    pass
     {% endfor %}
 
-class ModelResponse{{r.code}}(BaseModel):
+class {{ r.modelClassName }}(BaseModel):
     """
     {{ r.description | indent(width=4)}}
 
     Response for response code {{ r.code }}. This is the response body model that also contains the headers.
 
-    -----Example responses:
+    --Example responses from ESI:
     {{ r.example | indent(width=4)}}
 
     """
-    headers: ModelResponseHeaders{{ r.code }} = Field(..., description='The response headers for this request.')
+
+    headers: ResponseHeaders{{ r.code }} = Field(..., description='The response headers for this request.')
     {% for p in r.body_properties -%}
     {{p.pydantic_field}}
+    {% else %}
+    pass
     {% endfor %}
 {% endfor %}
 
@@ -49,7 +54,7 @@ class {{ m.class_name }}(ESIRequest):
         ESI route with input request parameters
 
         {% for i in m.pathParams -%}
-        {{ i.function_docstring }}
+        {{ i.function_docstring|indent(width=8) }}
         {% endfor %}
         :return: ESI route with request path parameters if any
         """
@@ -64,14 +69,14 @@ class {{ m.class_name }}(ESIRequest):
         return {{ m.default_cache_ttl }}  # current esi x-cached-seconds header
 
     @validate_arguments
-    def run(self, {{ m.requestParams|join(', ', attribute='function_param') }}{{ ', **kwargs' if m.requestParams |length > 0  else '**kwargs' }}):
+    def run(self, {{ m.requestParams|join(', ', attribute='function_param') }}{{ ', **kwargs' if m.requestParams |length > 0  else '**kwargs' }}) -> Union[{{ m.responses_success|join(', ', attribute='modelClassName') }}]:
         """
         {{ m.summary | indent(width=8)}}
 
         {{ m.description | indent(width=8)}}
 
         {% for i in m.requestParams -%}
-        {{ i.function_docstring }}
+        {{ i.function_docstring|indent(width=8) }}
         {% endfor %}
         """
         return super().run({{ m.requestParams|join(', ', attribute='param_pass') }}{{ ', **kwargs' if m.requestParams |length > 0  else '**kwargs' }})

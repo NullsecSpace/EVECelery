@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, validator, Field, conlist
 import warnings
 from typing import Literal
 import json
@@ -62,13 +62,28 @@ class ModelProperty(BaseModel):
         return f':param {self.name}: {self.description}'
 
     @property
-    def pydantic_field(self):
-        if self.default_value:
-            return f'{self.name}: {self.type} = Field(default="{self.default_value}", description="{self.description})"'
-        elif self.required:
-            return f'{self.name}: {self.type} = Field(default=..., description="{self.description}")'
+    def name_valid_python(self):
+        return self.name.replace('-', '_')
+
+    @property
+    def name_alias(self) -> str | None:
+        """
+        returns an alias if the original name was invalid
+        """
+        if self.name != self.name_valid_python:
+            return self.name
         else:
-            return f'{self.name}: {self.type} | None = Field(description="{self.description})"'
+            return None
+
+    @property
+    def pydantic_field(self):
+        alias = f', alias="{self.name_alias}"' if self.name_alias else ''
+        if self.default_value:
+            return f'{self.name_valid_python}: {self.type} = Field(default="{self.default_value}", description="{self.description}"{alias})'
+        elif self.required:
+            return f'{self.name_valid_python}: {self.type} = Field(default=..., description="{self.description}"{alias})'
+        else:  # optional
+            return f'{self.name_valid_python}: {self.type} | None = Field(description="{self.description}"{alias})'
 
     @validator('type', pre=True, always=True)
     def convert_to_python_type(cls, v):
@@ -94,11 +109,10 @@ class ModelProperty(BaseModel):
 
     @classmethod
     def parse_swagger(cls, d: dict):
-        pass
         return cls(name=d.get('name'),
                    type=extract_type(d),
                    paramLocation=d.get('in'),
-                   description=d.get('description'),
+                   description=(d.get('description', '') + ' -- ' + str(d.get('enum', ''))).rstrip('- '),
                    default_value=d.get('default'),
                    required=d.get('required', False)
                    )
@@ -110,6 +124,13 @@ class ModelResponse(BaseModel):
     description: str = 'No description provided'
     body_properties: list[ModelProperty] = Field(default_factory=list)
     header_properties: list[ModelProperty] = Field(default_factory=list)
+
+    @property
+    def modelClassName(self):
+        """
+        class name of object to create
+        """
+        return f'SuccessResponse{self.code}'
 
     @classmethod
     def parse_swagger(cls, code: int, d: dict):
@@ -155,7 +176,7 @@ class ModelPath(BaseModel):
     description: str = 'No description provided.'
     default_cache_ttl: int
     parameters: list[ModelProperty] = Field(default_factory=list, description='Input parameters to function call')
-    responses_success: list[ModelResponse] = Field(default_factory=list)
+    responses_success: conlist(ModelResponse, min_items=1)
     tags: list[str] = Field(default_factory=list)
 
     @validator('default_cache_ttl', pre=True, always=True)
@@ -174,19 +195,19 @@ class ModelPath(BaseModel):
 
     @property
     def pathParams(self) -> list[ModelProperty]:
-        return_items = []
-        for p in self.parameters:
-            if p.pathParam:
-                return_items.append(p)
-        return return_items
+        return [p for p in self.requestParams if p.pathParam]
 
     @property
     def requestParams(self) -> list[ModelProperty]:
-        return_items = []
+        params_no_default = []
+        params_has_default = []
         for p in self.parameters:
             if not p.headerParam:
-                return_items.append(p)
-        return return_items
+                if p.default_value or not p.required:
+                    params_has_default.append(p)
+                else:
+                    params_no_default.append(p)
+        return params_no_default + params_has_default
 
     @classmethod
     def parse_swagger(cls, full_swagger_dict: dict, path_dict: dict, path_str: str, method: str):
