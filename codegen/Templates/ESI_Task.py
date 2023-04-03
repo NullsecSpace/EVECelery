@@ -1,3 +1,10 @@
+"""
+A task definition module with associated response models returned by the task.
+
+This module was automatically generated from Jinja templates with the codegen tool included in the root of this repo.
+You should not directly modify this module but instead modify the template 'codegen/Templates/ESI_Task.py'.
+"""
+
 from EVECelery.tasks.BaseTasks.ESIResqust import ESIRequest
 from EVECelery.exceptions.tasks import InputValidationError
 from pydantic import BaseModel, Field, validate_arguments

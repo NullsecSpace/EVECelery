@@ -191,7 +191,7 @@ class ModelPath(BaseModel):
         """
         the package to place module in
         """
-        return self.tags[0] if len(self.tags) >= 1 else 'uncategorized'
+        return (self.tags[0] if len(self.tags) >= 1 else 'uncategorized').replace(' ', '')
 
     @property
     def pathParams(self) -> list[ModelProperty]:

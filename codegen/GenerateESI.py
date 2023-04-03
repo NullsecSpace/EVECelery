@@ -50,6 +50,25 @@ class GenerateAPI:
                 self.templates_rendered[package][m.class_name] = m_rendered
                 self.total_templates_success += 1
 
+    def render_attribute_injection_templates(self):
+        for package in list(self.templates_rendered.keys()):
+            t = self.template_env.get_template('AttributeInjection.py')
+            package_attribute_injection = t.render(package_name=package, module_names=self.templates_rendered.get(package, {}).keys())
+            package_attribute_injection = black.format_str(package_attribute_injection, mode=black.Mode(
+                target_versions={black.TargetVersion.PY310},
+                is_pyi=False,
+                string_normalization=False
+            ))
+            self.templates_rendered[package]['AttributeInjection'] = package_attribute_injection
+        t = self.template_env.get_template('RootAttributeInjection.py')
+        root_attribute_injection = t.render(package_names=self.templates_rendered.keys())
+        root_attribute_injection = black.format_str(root_attribute_injection, mode=black.Mode(
+            target_versions={black.TargetVersion.PY310},
+            is_pyi=False,
+            string_normalization=False
+        ))
+        self.templates_rendered['AttributeInjection'] = root_attribute_injection
+
     def print_summary(self):
         print(f'Total templates rendered successfully: {self.total_templates_success}\n'
               f'Total templates that failed to render / skipped: {self.total_templates_fail}')
@@ -59,4 +78,5 @@ class GenerateAPI:
         g = cls()
         g.generate_template_models()
         g.render_templates()
+        g.render_attribute_injection_templates()
         g.print_summary()
