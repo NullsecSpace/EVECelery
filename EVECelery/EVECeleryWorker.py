@@ -1,5 +1,6 @@
 from celery import Celery, Task
-from EVECelery.__version__ import __version__, __url__, __license__
+
+from .__version__ import __version__, __url__, __license__
 from EVECelery.tasks.BaseTasks.BaseTask import BaseTask
 from EVECelery.tasks.Alliance import *
 from EVECelery.tasks.Character import *
@@ -13,7 +14,7 @@ import os
 from typing import Optional
 
 
-class CeleryWorker(object):
+class EVECeleryWorker(object):
     """Celery worker server wrapper.
     Creating an instance of this class creates a celery app and registers the default tasks.
 
@@ -124,26 +125,3 @@ class CeleryWorker(object):
         self.print_header()
         self.app.start(argv=["worker", "-l", "WARNING", f"--autoscale={self.max_concurrency},1",
                              "-Q", ",".join(self.queues)])
-
-
-class CeleryBeat(CeleryWorker):
-    """Celery beat scheduler for periodic tasks.
-
-    """
-
-    def schedule_task(self, schedule_name: str, schedule_config: dict):
-        """Schedule a task to run at intervals. The passed in schedule object is a dictionary following the
-        format and fields described here:
-        https://docs.celeryproject.org/en/stable/userguide/periodic-tasks.html#available-fields
-
-        :param schedule_name: Name of the scheduled job. This must be unique.
-        :param schedule_config: The scheduled job config as specified at
-            https://docs.celeryproject.org/en/stable/userguide/periodic-tasks.html#available-fields
-        :return: None
-        """
-        self.beat_schedule[schedule_name] = schedule_config
-        self.app.conf.update(beat_schedule=self.beat_schedule)
-
-    def start(self):
-        self.print_header()
-        self.app.start(argv=["beat"])

@@ -36,7 +36,7 @@ setuptools.setup(name='EVECelery',
                  python_requires=">=3.7",
                  entry_points={
                      'console_scripts': [
-                         'eve-celery = EVECelery:main'
+                         'eve-celery = EVECelery.__main__:main'
                      ]
                  },
                  classifiers=[

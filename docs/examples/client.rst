@@ -9,10 +9,10 @@ This sample imports the Character API tasks that returns character information f
 
 .. code:: python
 
-    from ESICelery.CeleryApps import CeleryWorker
-    from ESICelery.tasks.Character import *
+    from EVECelery import EVECeleryWorker
+    from EVECelery.tasks.Character import *
 
-    c = CeleryWorker()
+    c = EVECeleryWorker()
 
     r = CharacterPublicInfo().get_sync(timeout=5, character_id=1326083433)
     print(r)
@@ -29,10 +29,10 @@ In this sample we use the obtain a list of system ids between the origin and des
 
 .. code:: python
 
-    from ESICelery.CeleryApps import CeleryWorker
-    from ESICelery.tasks.Routes import *
+    from EVECelery import EVECeleryWorker
+    from EVECelery.tasks.Routes import *
 
-    c = CeleryWorker()
+    c = EVECeleryWorker()
 
     r = Route().get_sync(timeout=5, origin=30000142, destination=30002659)  # Jita to Dodixie - 12 jumps
     print(f"Jumps: {len(r) - 1} Systems: {r} ")
@@ -46,10 +46,10 @@ Return system information for a given solar system ID.
 
 .. code:: python
 
-    from ESICelery.CeleryApps import CeleryWorker
-    from ESICelery.tasks.Universe import *
+    from EVECelery import EVECeleryWorker
+    from EVECelery.tasks.Universe import *
 
-    c = CeleryWorker()
+    c = EVECeleryWorker()
     r = SystemInfo().get_sync(timeout=5, system_id=30000142)
     print(r)
 

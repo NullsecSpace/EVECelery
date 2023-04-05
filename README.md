@@ -68,10 +68,12 @@ $ eve-celery
 You can also start the worker from a Python script if you don't want to set environmental variables.
 
 ```python
-from EVECelery.CeleryApps import CeleryWorker
 
-c = CeleryWorker(broker_user="user", broker_password="pass", broker_host="host", broker_port=5672, broker_vhost="esi",
-                 result_user="user", result_password="pass", result_host="host", result_port=6379, result_db=0)
+from EVECelery import EVECeleryWorker
+
+c = EVECeleryWorker(broker_user="user", broker_password="pass", broker_host="host", broker_port=5672,
+                    broker_vhost="esi",
+                    result_user="user", result_password="pass", result_host="host", result_port=6379, result_db=0)
 
 c.start()
 ```
@@ -80,12 +82,13 @@ c.start()
 From another Python script you can send tasks to the queues and receive results:
 
 ```python
-from EVECelery.CeleryApps import CeleryWorker
+
+from EVECelery import EVECeleryWorker
 from EVECelery.tasks.Universe import SystemInfo
 
 # only need to make one CeleryWorker in our code to init the tasks and setup connections to RabbitMQ and Redis
 # by not passing connection params to CeleryWorker() the connection info will be read from environmental variables
-c = CeleryWorker()
+c = EVECeleryWorker()
 
 # note we don't call c.start() here as this is not a worker node script.
 # we are calling the task api to submit requests to the message queue which run on the Celery worker nodes
