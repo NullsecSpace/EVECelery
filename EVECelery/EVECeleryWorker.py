@@ -68,7 +68,7 @@ class EVECeleryWorker(object):
             'enable_utc': True,
             'broker_url': self.broker.connection_str,
             'result_backend': self.result_backend.connection_str,
-            'task_default_queue': f'{self.queue_prefix}Default',
+            'task_default_queue': self.default_queue,
         }
 
     def _register_all_tasks(self):
