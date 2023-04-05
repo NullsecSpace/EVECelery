@@ -1,7 +1,13 @@
 import pytest
 import random
 from .fixtures import server_rabbitmq, server_redis
+from EVECelery.tasks.BaseTasks.BaseTask import BaseTask
 from EVECelery.tasks.Alliance import *
+from EVECelery.tasks.Character import *
+from EVECelery.tasks.Corporation import *
+from EVECelery.tasks.Market import *
+from EVECelery.tasks.Routes import *
+from EVECelery.tasks.Universe import *
 from EVECelery.tasks.Samples import *
 
 
@@ -89,8 +95,8 @@ def celery_config(mock_env_rabbitmq_redis):
 
 @pytest.fixture(scope='function')
 def celery_register_tasks(celery_config, celery_app):
-    celery_app.register_task(AllianceInfo())
-    celery_app.register_task(CachedAddTask())
+    for t in BaseTask.get_all_subtasks():
+        celery_app.register_task(t())
     return celery_app
 
 

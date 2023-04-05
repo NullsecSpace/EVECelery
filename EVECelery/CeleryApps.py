@@ -1,5 +1,6 @@
 from celery import Celery, Task
 from EVECelery.__version__ import __version__, __url__, __license__
+from EVECelery.tasks.BaseTasks.BaseTask import BaseTask
 from EVECelery.tasks.Alliance import *
 from EVECelery.tasks.Character import *
 from EVECelery.tasks.Corporation import *
@@ -26,8 +27,7 @@ class CeleryWorker(object):
     :param result_host: Redis hostname
     :param result_port: Redis port - normally 6379
     :param result_db: Redis db - normally 0 for the default db
-    :param config_object: Custom config object to overwrite the default EVECelery.celeryconfig - optional
-    :param esi_queue_prefix: Prefix to add to all generated ESI queue names
+    :param queue_prefix: Prefix to add to all generated ESI queue names
     """
 
     def __init__(self, broker_user: Optional[str] = None, broker_password: Optional[str] = None,
@@ -35,7 +35,7 @@ class CeleryWorker(object):
                  broker_vhost: Optional[str] = None,
                  result_user: Optional[str] = None, result_password: Optional[str] = None,
                  result_host: Optional[str] = None, result_port: Optional[int] = None, result_db: Optional[int] = None,
-                 config_object: str = "EVECelery.celeryconfig", esi_queue_prefix: str = "ESI-",
+                 queue_prefix: str = "EVECelery.",
                  connection_check: bool = False):
         self.broker = ClientRabbitMQ(user=broker_user, password=broker_password, host=broker_host, port=broker_port,
                                      vhost=broker_vhost)
@@ -45,51 +45,46 @@ class CeleryWorker(object):
         if connection_check:
             self.result_backend.check_connection()
 
-        self.max_concurrency = int(os.environ.get('EVECelery_MaxConcurrency', 4))
+        self.max_concurrency = int(os.environ.get('EVECelery_MaxConcurrency', 10))
 
-        self.esi_queue_prefix = esi_queue_prefix
+        self.queue_prefix = queue_prefix
         self.app = Celery("EVECelery")
-        self.app.config_from_object(config_object)
-        self.app.conf.update(broker_url=self.broker.connection_str)
-        self.app.conf.update(result_backend=self.result_backend.connection_str)
-        self.app.conf.update(task_default_queue=f"{self.esi_queue_prefix}Default")
+        self.app.conf.update(**self.celery_config())
 
-        self.queues = [f"{self.esi_queue_prefix}Default"]
+        self.default_queue = f"{self.queue_prefix}Default"
+        self.queues = set()
+        self.queues.add(self.default_queue)
+
         self.task_routes = {}
         self.beat_schedule = {}
-        self._register_defaults()
+        self._register_all_tasks()
 
-    def esi_tasks(self):
-        """Default ESI tasks
+    def celery_config(self) -> dict:
+        return {
+            'task_serializer': 'json',
+            'result_serializer': 'json',
+            'accept_content': ['json'],
+            'enable_utc': True,
+            'broker_url': self.broker.connection_str,
+            'result_backend': self.result_backend.connection_str,
+            'task_default_queue': f'{self.queue_prefix}Default',
+        }
 
-        :return: ESI task instances registered by default
+    def _register_all_tasks(self):
         """
-        yield AllianceInfo()
-        yield CharacterPublicInfo()
-        yield CorporationInfo()
-        yield PricesList()
-        yield CategoryInfo()
-        yield ConstellationInfo()
-        yield FactionsList()
-        yield GroupInfo()
-        yield RegionInfo()
-        yield Route()
-        yield SystemInfo()
-        yield TypeInfo()
+        Register all subtasks that inherit from BaseTask
 
-    def tasks_to_register(self):
-        """Yields tuple pairs of (task, queue name) to register with the Celery app
-
-        :return: yields tuple consisting of (task instance, queue name)
+        This method will register and initialize all subtasks that inherit from BaseTask.
         """
-        for t in self.esi_tasks():
-            yield (t, f"{self.esi_queue_prefix}{t.name}")
-
-    def _register_defaults(self):
-        for t in self.tasks_to_register():
-            self.register_task(t[0])
-            self.register_additional_queue(t[1])
-            self.register_task_route(t[0].name, t[1])
+        for t in BaseTask.get_all_subtasks():
+            task = t()
+            self.app.register_task(task)
+            if hasattr(task, 'queue_assignment') and task.queue_assignment is not None:
+                q = f'{self.queue_prefix}{task.queue_assignment}'
+                self.register_additional_queue(q)
+                self.register_task_route(task.name, q)
+            else:
+                self.register_task_route(task.name, self.default_queue)
 
     def register_additional_queue(self, queue: str):
         """Register an additional queue that this Celery app should process.
@@ -97,7 +92,7 @@ class CeleryWorker(object):
         :param queue: Name of the queue
         :return: None
         """
-        self.queues.append(queue)
+        self.queues.add(queue)
 
     def register_task_route(self, task_name: str, queue_name: str):
         """Register a task to a specific queue using a Celery task route.

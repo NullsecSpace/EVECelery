@@ -58,6 +58,7 @@ Ensure the following environmental variables are set and run the application via
 * EVECelery_Redis_ResultBackend_Host
 * EVECelery_Redis_ResultBackend_Port
 * EVECelery_Redis_ResultBackend_DB
+* EVECelery_Email
 
 ```shell
 $ eve-celery

@@ -14,6 +14,17 @@ class BaseTask(Task):
     def __init__(self):
         self.name = self.__class__.__name__
 
+    @property
+    def queue_assignment(self) -> str | None:
+        """
+        The queue to register this task with.
+
+        Returns the name of the queue to optionally register this task with.
+        If None is provided then this task is registered with the default queue defined by the celery app.
+
+        """
+        return None
+
     def get_async(self, ignore_result: bool = False, **kwargs) -> AsyncResult:
         """Returns an async result / promise representing the future evaluation of a task.
         This function does not block the calling process and returns immediately.
@@ -36,3 +47,16 @@ class BaseTask(Task):
         :return: The task result
         """
         return self.get_async(ignore_result=False, **kwargs).get(timeout=timeout, propagate=True)
+
+    @classmethod
+    def get_all_subtasks(cls):
+        """
+        Yield task subclasses that inherit from this task class.
+
+        Yields all subclasses from this base class. The base class itself is not yielded.
+
+        """
+        for c in cls.__subclasses__():
+            if issubclass(c, Task):
+                yield c
+            yield from c.get_all_subtasks()

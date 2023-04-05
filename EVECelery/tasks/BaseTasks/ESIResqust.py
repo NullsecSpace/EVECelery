@@ -8,6 +8,10 @@ from .CachedTask import CachedTask
 
 
 class ESIRequest(CachedTask):
+    @property
+    def queue_assignment(self) -> str | None:
+        return self.name
+
     def request_method(self) -> str:
         """
         Returns the type of request made to ESI

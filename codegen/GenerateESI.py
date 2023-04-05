@@ -18,7 +18,7 @@ class GenerateAPI:
 
     @classmethod
     def get_swagger_spec(cls, url: str = None) -> dict:
-        with open('codegen/swagger.json', 'r') as f:
+        with open('swagger.json', 'r') as f:
             return json.load(f)
 
     def generate_template_models(self):
