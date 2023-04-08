@@ -2,7 +2,7 @@ import os
 import sys
 from typing import Optional
 from pydantic import BaseModel, validator
-from EVECelery.utils.Singleton import Singleton
+from .BaseClient import BaseClient
 import traceback
 import redis
 
@@ -21,8 +21,9 @@ class ConfigRedis(BaseModel):
         return v
 
 
-class ClientRedis(metaclass=Singleton):
+class ClientRedis(BaseClient):
     """
+    Wrapper around Redis client that configures connection parameters from OS env variables.
 
     :param user: Redis user
     :param password: Redis password
@@ -51,6 +52,10 @@ class ClientRedis(metaclass=Singleton):
 
 
 class ClientRedisResultBackend(ClientRedis):
+    """
+    The result backend client for Celery
+
+    """
     def __init__(self, user: Optional[str] = None, password: Optional[str] = None, host: Optional[str] = None,
                  port: Optional[int] = None, db: Optional[int] = None):
         try:
@@ -73,30 +78,24 @@ class ClientRedisResultBackend(ClientRedis):
 
 
 class ClientRedisLocks(ClientRedis):
+    """
+    The redis connection for cache by tasks.
+
+    If env variables are not explicitly configured for this client it will use the same database as the result backend.
+    """
     def __init__(self, user: Optional[str] = None, password: Optional[str] = None, host: Optional[str] = None,
                  port: Optional[int] = None, db: Optional[int] = None):
         try:
             if user is None:
-                user = os.environ.get('EVECelery_Redis_Locks_User',
-                                      os.environ.get('EVECelery_Redis_ResultBackend_User'))
-                if user is None:
-                    raise KeyError('EVECelery_Redis_Locks_User')
+                user = os.environ.get('EVECelery_Redis_Locks_User') or os.environ['EVECelery_Redis_ResultBackend_User']
             if password is None:
-                password = os.environ.get('EVECelery_Redis_Locks_Password',
-                                          os.environ.get('EVECelery_Redis_ResultBackend_Password'))
-                if password is None:
-                    raise KeyError('EVECelery_Redis_Locks_Password')
+                password = os.environ.get('EVECelery_Redis_Locks_Password') or os.environ['EVECelery_Redis_ResultBackend_Password']
             if host is None:
-                host = os.environ.get('EVECelery_Redis_Locks_Host',
-                                      os.environ.get('EVECelery_Redis_ResultBackend_Host'))
-                if host is None:
-                    raise KeyError('EVECelery_Redis_Locks_Host')
+                host = os.environ.get('EVECelery_Redis_Locks_Host') or os.environ['EVECelery_Redis_ResultBackend_Host']
             if port is None:
-                port = os.environ.get('EVECelery_Redis_Locks_Port',
-                                      os.environ.get('EVECelery_Redis_ResultBackend_Port', 6379))
+                port = os.environ.get('EVECelery_Redis_Locks_Port') or os.environ.get('EVECelery_Redis_ResultBackend_Port', 6379)
             if db is None:
-                db = os.environ.get('EVECelery_Redis_Locks_DB',
-                                    int(os.environ.get('EVECelery_Redis_ResultBackend_DB', 0)) + 1)
+                db = os.environ.get('EVECelery_Redis_Locks_DB') or os.environ.get('EVECelery_Redis_ResultBackend_DB', 0)
         except KeyError as ex:
             traceback.print_exc()
             print(f'The environmental variable is not set for {ex}. '
@@ -106,30 +105,24 @@ class ClientRedisLocks(ClientRedis):
 
 
 class ClientRedisCache(ClientRedis):
+    """
+    The redis connection for cache by tasks.
+
+    If env variables are not explicitly configured for this client it will use the same database as the result backend.
+    """
     def __init__(self, user: Optional[str] = None, password: Optional[str] = None, host: Optional[str] = None,
                  port: Optional[int] = None, db: Optional[int] = None):
         try:
             if user is None:
-                user = os.environ.get('EVECelery_Redis_Cache_User',
-                                      os.environ.get('EVECelery_Redis_ResultBackend_User'))
-                if user is None:
-                    raise KeyError('EVECelery_Redis_Cache_User')
+                user = os.environ.get('EVECelery_Redis_Cache_User') or os.environ['EVECelery_Redis_ResultBackend_User']
             if password is None:
-                password = os.environ.get('EVECelery_Redis_Cache_Password',
-                                          os.environ.get('EVECelery_Redis_ResultBackend_Password'))
-                if password is None:
-                    raise KeyError('EVECelery_Redis_Cache_Password')
+                password = os.environ.get('EVECelery_Redis_Cache_Password') or os.environ['EVECelery_Redis_ResultBackend_Password']
             if host is None:
-                host = os.environ.get('EVECelery_Redis_Cache_Host',
-                                      os.environ.get('EVECelery_Redis_ResultBackend_Host'))
-                if host is None:
-                    raise KeyError('EVECelery_Redis_Cache_Host')
+                host = os.environ.get('EVECelery_Redis_Cache_Host') or os.environ['EVECelery_Redis_ResultBackend_Host']
             if port is None:
-                port = os.environ.get('EVECelery_Redis_Cache_Port',
-                                      os.environ.get('EVECelery_Redis_ResultBackend_Port', 6379))
+                port = os.environ.get('EVECelery_Redis_Cache_Port') or os.environ.get('EVECelery_Redis_ResultBackend_Port', 6379)
             if db is None:
-                db = os.environ.get('EVECelery_Redis_Cache_DB',
-                                    int(os.environ.get('EVECelery_Redis_ResultBackend_DB', 0)) + 2)
+                db = os.environ.get('EVECelery_Redis_Cache_DB') or os.environ.get('EVECelery_Redis_ResultBackend_DB', 0)
         except KeyError as ex:
             traceback.print_exc()
             print(f'The environmental variable is not set for {ex}. '

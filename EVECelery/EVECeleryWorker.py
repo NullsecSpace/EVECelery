@@ -1,5 +1,4 @@
 from celery import Celery, Task
-
 from .__version__ import __version__, __url__, __license__
 from EVECelery.tasks.BaseTasks.BaseTask import BaseTask
 from EVECelery.tasks.Alliance import *
@@ -12,9 +11,10 @@ from EVECelery.clients.ClientRabbitMQ import ClientRabbitMQ
 from EVECelery.clients.ClientRedis import ClientRedisResultBackend
 import os
 from typing import Optional
+from EVECelery.utils.Singleton import Singleton
 
 
-class EVECeleryWorker(object):
+class EVECeleryWorker(metaclass=Singleton):
     """Celery worker server wrapper.
     Creating an instance of this class creates a celery app and registers the default tasks.
 
@@ -45,14 +45,16 @@ class EVECeleryWorker(object):
 
         if connection_check:
             self.result_backend.check_connection()
+            self.broker.check_connection()
 
         self.max_concurrency = int(os.environ.get('EVECelery_MaxConcurrency', 10))
 
         self.queue_prefix = queue_prefix
+        self.default_queue = f"{self.queue_prefix}Default"
+
         self.app = Celery("EVECelery")
         self.app.conf.update(**self.celery_config())
 
-        self.default_queue = f"{self.queue_prefix}Default"
         self.queues = set()
         self.queues.add(self.default_queue)
 

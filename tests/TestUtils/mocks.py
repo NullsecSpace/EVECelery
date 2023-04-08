@@ -68,6 +68,24 @@ def mock_env_rabbitmq_redis(monkeypatch, server_rabbitmq, server_redis):
 
 
 @pytest.fixture(scope='function')
+def mock_env_rabbitmq(monkeypatch, server_rabbitmq):
+    """
+    Starts a single Redis node and associated variables for the connection and fake variables for RabbitMQ.
+    """
+    env_vars = {
+        **fake_redis_connection_vars(),
+        'EVECelery_RabbitMQ_User': server_rabbitmq['user'],
+        'EVECelery_RabbitMQ_Password': server_rabbitmq['pass'],
+        'EVECelery_RabbitMQ_Host': server_rabbitmq['host'],
+        'EVECelery_RabbitMQ_Port': server_rabbitmq['port'],
+        'EVECelery_RabbitMQ_Vhost': server_rabbitmq['vhost'],
+    }
+    for k, v in env_vars.items():
+        monkeypatch.setenv(k, v)
+    yield env_vars
+
+
+@pytest.fixture(scope='function')
 def mock_env_redis(monkeypatch, server_redis):
     """
     Starts a single Redis node and associated variables for the connection and fake variables for RabbitMQ.

@@ -6,12 +6,12 @@ class TestCacheTask:
     def test_get_redis_locks_success(self, mock_env_redis):
         r = CachedTask().redis_locks
         assert r.ping() is True
-        assert r.get_connection_kwargs()['db'] == 2
+        assert r.get_connection_kwargs()['db'] == 1
 
     def test_get_redis_cache_success(self, mock_env_redis):
         r = CachedTask().redis_cache
         assert r.ping() is True
-        assert r.get_connection_kwargs()['db'] == 3
+        assert r.get_connection_kwargs()['db'] == 1
 
     def test_get_redis_locks_fail(self):
         with pytest.raises(SystemExit):

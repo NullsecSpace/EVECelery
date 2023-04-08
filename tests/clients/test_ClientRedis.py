@@ -112,7 +112,7 @@ class TestClientRedisLocks:
         assert c.config.password == mock_env_redis.get('EVECelery_Redis_ResultBackend_Password')
         assert c.config.host == mock_env_redis.get('EVECelery_Redis_ResultBackend_Host')
         assert c.config.port == mock_env_redis.get('EVECelery_Redis_ResultBackend_Port')
-        assert c.config.db == mock_env_redis.get('EVECelery_Redis_ResultBackend_DB') + 1
+        assert c.config.db == mock_env_redis.get('EVECelery_Redis_ResultBackend_DB')
 
         assert c.check_connection() is True
 
@@ -155,6 +155,6 @@ class TestClientRedisCache:
         assert c.config.password == mock_env_redis.get('EVECelery_Redis_ResultBackend_Password')
         assert c.config.host == mock_env_redis.get('EVECelery_Redis_ResultBackend_Host')
         assert c.config.port == mock_env_redis.get('EVECelery_Redis_ResultBackend_Port')
-        assert c.config.db == mock_env_redis.get('EVECelery_Redis_ResultBackend_DB') + 2
+        assert c.config.db == mock_env_redis.get('EVECelery_Redis_ResultBackend_DB')
 
         assert c.check_connection() is True

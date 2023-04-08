@@ -5,6 +5,7 @@ from pydantic import BaseModel
 import traceback
 from .BaseClient import BaseClient
 from EVECelery.utils.Singleton import Singleton
+import pika
 
 
 class ConfigRabbitMQ(BaseModel):
@@ -17,6 +18,7 @@ class ConfigRabbitMQ(BaseModel):
 
 class ClientRabbitMQ(BaseClient, metaclass=Singleton):
     """
+    The RabbitMQ client wrapper used as the Celery broker service.
 
     :param user: RabbitMQ user
     :param password: RabbitMQ password
@@ -44,6 +46,16 @@ class ClientRabbitMQ(BaseClient, metaclass=Singleton):
                   f'Please set this env var or pass it as an argument to initialize ClientRabbitMQ.')
             sys.exit(1)
         self.config = ConfigRabbitMQ(user=user, password=password, host=host, port=port, vhost=vhost)
+
+    def check_connection(self) -> bool:
+        credentials = pika.PlainCredentials(username=self.config.user, password=self.config.password,
+                                            erase_on_connect=True)
+        c = pika.BlockingConnection(pika.ConnectionParameters(host=self.config.host, port=self.config.port,
+                                                              virtual_host=self.config.vhost, credentials=credentials,
+                                                              blocked_connection_timeout=10, socket_timeout=10))
+        c.close()
+        return True
+
 
     @property
     def connection_str(self):

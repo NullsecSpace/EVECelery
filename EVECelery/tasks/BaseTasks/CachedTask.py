@@ -22,17 +22,24 @@ class CachedTask(BaseTask):
         """Get the Redis client for managing the cache"""
         return ClientRedisCache().redis
 
-    def get_redis_response_key(self, **kwargs) -> str:
-        """Returns the Redis key for storing a cache response with the provided input parameters.
+    def get_hash(self, **kwargs) -> str:
+        """
+        Returns the SHA256 hash of kwargs
+
+        """
+        h = hashlib.sha256()
+        for k, v in sorted(kwargs.items()):
+            h.update(f'{k}:{v}'.encode('utf-8'))
+        return h.hexdigest()
+
+    def get_redis_cache_key(self, **kwargs) -> str:
+        """Returns the Redis key for storing a cached response with the provided input parameters.
 
         :param kwargs: Parameters passed to the task
         :return: Redis key for storing the value of the ESI response
         :rtype: str
         """
-        h = hashlib.sha256()
-        for k, v in sorted(kwargs.items()):
-            h.update(f'{k}:{v}'.encode('utf-8'))
-        return f'{self.name}-{h.hexdigest()}'
+        return f'Cache.{self.name}.{self.get_hash(**kwargs)}'
 
     def get_redis_lock_key(self, **kwargs) -> str:
         """Returns the Redis key for lock response with the provided input parameters.
@@ -41,14 +48,13 @@ class CachedTask(BaseTask):
         :return: Redis key for storing ESI locks
         :rtype: str
         """
-        k = self.get_redis_response_key(**kwargs)
-        return f"Lock-{k}"
+        return f'Lock.{self.name}.{self.get_hash(**kwargs)}'
 
     def cache_key_exists(self, **kwargs) -> bool:
         """
         Check if cache key exists for given input
         """
-        return self.redis_cache.exists(self.get_redis_response_key(**kwargs)) >= 1
+        return self.redis_cache.exists(self.get_redis_cache_key(**kwargs)) >= 1
 
     def validate_inputs(self, **kwargs) -> None:
         """Run validation checks before continuing a task run or checking the cache.
@@ -69,7 +75,7 @@ class CachedTask(BaseTask):
         :raises EVECelery.exceptions.tasks.InputValidationError: If a task input parameter contains invalid data or syntax
         """
         self.validate_inputs(**kwargs)
-        cached_data = self.redis_cache.get(self.get_redis_response_key(**kwargs))
+        cached_data = self.redis_cache.get(self.get_redis_cache_key(**kwargs))
         if cached_data:
             return json.loads(cached_data)
         else:
@@ -84,7 +90,7 @@ class CachedTask(BaseTask):
                 return self.get_cached(**kwargs)
             except NotCached:
                 response, ttl = self._run_get_result(**kwargs)
-                self.redis_cache.set(name=self.get_redis_response_key(**kwargs), value=json.dumps(response), ex=ttl)
+                self.redis_cache.set(name=self.get_redis_cache_key(**kwargs), value=json.dumps(response), ex=ttl)
                 return response
 
     def _run_get_result(self, **kwargs) -> Tuple[Union[list, str, dict], int]:
