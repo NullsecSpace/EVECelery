@@ -12,6 +12,7 @@ from EVECelery.clients.ClientRedis import ClientRedisResultBackend
 import os
 from typing import Optional
 from EVECelery.utils.Singleton import Singleton
+import random
 
 
 class EVECeleryWorker(metaclass=Singleton):
@@ -52,6 +53,7 @@ class EVECeleryWorker(metaclass=Singleton):
         self.queue_prefix = queue_prefix
         self.default_queue = f"{self.queue_prefix}Default"
 
+        self.worker_name = f"EVECeleryWorker{random.randint(1000000, 9999999)}"
         self.app = Celery("EVECelery")
         self.app.conf.update(**self.celery_config())
 
@@ -71,6 +73,7 @@ class EVECeleryWorker(metaclass=Singleton):
             'broker_url': self.broker.connection_str,
             'result_backend': self.result_backend.connection_str,
             'task_default_queue': self.default_queue,
+            'result_expires': 5400  # default
         }
 
     def _register_all_tasks(self):
@@ -125,5 +128,5 @@ class EVECeleryWorker(metaclass=Singleton):
         :return: None
         """
         self.print_header()
-        self.app.start(argv=["worker", "-l", "WARNING", f"--autoscale={self.max_concurrency},1",
+        self.app.start(argv=["worker", "-l", "WARNING", f"-n{self.worker_name}@%h", f"--autoscale={self.max_concurrency},1",
                              "-Q", ",".join(self.queues)])
