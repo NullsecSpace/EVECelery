@@ -6,7 +6,6 @@ You should not directly modify this module but instead modify the template 'code
 """
 
 from EVECelery.tasks.BaseTasks.ESIResqust import ESIRequest
-from EVECelery.exceptions.tasks import InputValidationError
 from pydantic import BaseModel, Field, validate_arguments
 from typing import Union
 

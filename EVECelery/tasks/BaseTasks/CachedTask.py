@@ -56,16 +56,6 @@ class CachedTask(BaseTask):
         """
         return self.redis_cache.exists(self.get_redis_cache_key(**kwargs)) >= 1
 
-    def validate_inputs(self, **kwargs) -> None:
-        """Run validation checks before continuing a task run or checking the cache.
-
-        :param kwargs: Task request parameters
-        :return: None
-        :raises EVECelery.exceptions.tasks.InputValidationError: If an input task parameter contains
-            invalid syntax
-        """
-        pass
-
     def get_cached(self, **kwargs) -> Union[list, str, dict]:
         """Get the cached response with the task request parameters from Redis if it exists.
 
@@ -74,7 +64,6 @@ class CachedTask(BaseTask):
         :raises EVECelery.exceptions.tasks.NotCached: If the request has not yet been resolved by a previous task invocation or the TTL expired.
         :raises EVECelery.exceptions.tasks.InputValidationError: If a task input parameter contains invalid data or syntax
         """
-        self.validate_inputs(**kwargs)
         cached_data = self.redis_cache.get(self.get_redis_cache_key(**kwargs))
         if cached_data:
             return json.loads(cached_data)

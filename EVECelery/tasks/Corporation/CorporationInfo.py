@@ -1,5 +1,4 @@
 from EVECelery.tasks.BaseTasks.ESIResqust import ESIRequest
-from EVECelery.exceptions.tasks import InputValidationError
 
 
 class CorporationInfo(ESIRequest):
@@ -8,11 +7,3 @@ class CorporationInfo(ESIRequest):
 
     def route(self, corporation_id: int):
         return f"/corporations/{corporation_id}"
-
-    def validate_inputs(self, corporation_id: int) -> None:
-        try:
-            int(corporation_id)
-        except ValueError:
-            raise InputValidationError("Input parameter must be an integer.")
-
-

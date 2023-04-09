@@ -40,6 +40,13 @@ class BaseTask(Task):
         :param Optional[dict] kwargs_get: Dictionary of keyword arguments passed to `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_
         :param **kwargs: Keyword arguments passed to this task's :func:`~run` method.
         :return: Result of a task
+
+        :examples:
+        >>> BaseTask.get_sync(kwargs_get={'timeout': 5}) # equivalent to BaseTask.apply_async().get(timeout=5)
+
+        >>> r = BaseTask.get_sync() # equivalent to BaseTask.apply_async().get()
+
+        >>> r = BaseTask.get_sync(lookup_id=5) # equivalent to BaseTask.apply_async(kwargs={'lookup_id': 5}).get()
         """
         if kwargs_apply_async is None:
             kwargs_apply_async = {}
