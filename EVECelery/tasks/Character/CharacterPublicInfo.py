@@ -3,7 +3,7 @@ from EVECelery.exceptions.tasks import InputValidationError
 
 
 class CharacterPublicInfo(ESIRequest):
-    def ttl_404(self) -> int:
+    def default_ttl(self) -> int:
         return 86400  # current esi x-cached-seconds header
 
     def route(self, character_id: int):

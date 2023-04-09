@@ -3,7 +3,7 @@ from EVECelery.exceptions.tasks import InputValidationError
 
 
 class AllianceInfo(ESIRequest):
-    def ttl_404(self) -> int:
+    def default_ttl(self) -> int:
         return 3600  # current esi x-cached-seconds header
 
     def route(self, alliance_id: int):

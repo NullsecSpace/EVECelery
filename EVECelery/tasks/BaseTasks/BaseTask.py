@@ -1,15 +1,16 @@
-from typing import Union
 from celery import Task
-from celery.result import AsyncResult
+from typing import Optional
+from pydantic import validate_arguments
 
 
 class BaseTask(Task):
-    """The base task class"""
-    autoretry_for = (Exception,)
-    max_retries = 1
-    retry_backoff = 1
-    retry_backoff_max = 1
-    retry_jitter = False
+    """
+    The base Celery task class used by EVECelery.
+
+    All tasks to be processed and automatically registered by the EVECelery workers should inherit from this base task.
+
+    This BaseTask supports all methods and properties available by Celery's class-based `tasks <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html>`_.
+    """
 
     def __init__(self):
         self.name = self.__class__.__name__
@@ -25,28 +26,29 @@ class BaseTask(Task):
         """
         return None
 
-    def get_async(self, ignore_result: bool = False, **kwargs) -> AsyncResult:
-        """Returns an async result / promise representing the future evaluation of a task.
-        This function does not block the calling process and returns immediately.
-
-        :param ignore_result: Set false to store result in celery result backend, else ignore the result.
-        :type ignore_result: bool
-        :param kwargs: ESI request parameters
-        :return: Promise for a future evaluation of a celery task
-        :rtype: celery.result.AsyncResult
+    @validate_arguments
+    def get_sync(self, kwargs_apply_async: Optional[dict] = None, kwargs_get: Optional[dict] = None, **kwargs):
         """
-        return self.apply_async(ignore_result=ignore_result, kwargs=kwargs)
+        Call this task and block until the result is available.
 
-    def get_sync(self, timeout: float = 10, **kwargs) -> Union[list, str, dict]:
-        """Call a task and block until the result is set.
+        Calls this celery task with additional helper functionality specific for
+        EVECelery (deserialization to pydantic models support and result backend resource cleanup).
+        This function is a wrapper around Celery's `task.apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_
+        and `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_ methods.
 
-        :param timeout: The time in seconds to block waiting for the task to complete.
-        Setting this to None blocks forever.
-        :type timeout: float
-        :param kwargs: Task parameters
-        :return: The task result
+        :param Optional[dict] kwargs_apply_async: Dictionary of keyword arguments passed to `task.apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_
+        :param Optional[dict] kwargs_get: Dictionary of keyword arguments passed to `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_
+        :param **kwargs: Keyword arguments passed to this task's :func:`~run` method.
+        :return: Result of a task
         """
-        return self.get_async(ignore_result=False, **kwargs).get(timeout=timeout, propagate=True)
+        if kwargs_apply_async is None:
+            kwargs_apply_async = {}
+        if kwargs_get is None:
+            kwargs_get = {}
+        f = self.apply_async(kwargs=kwargs, **kwargs_apply_async)
+        result = f.get(**kwargs_get)
+        f.forget()
+        return result
 
     @classmethod
     def get_all_subtasks(cls):

@@ -8,8 +8,22 @@ from .CachedTask import CachedTask
 
 
 class ESIRequest(CachedTask):
+    autoretry_for = (Exception,)
+    max_retries = 3
+    retry_backoff = 5
+    retry_backoff_max = 60
+    retry_jitter = True
+    soft_time_limit = 30
+
     @property
     def queue_assignment(self) -> str | None:
+        """
+        The queue to register this task with.
+
+        Returns the name of the queue to optionally register this task with.
+        If None is provided then this task is registered with the default queue defined by the celery app.
+
+        """
         return self.name
 
     def request_method(self) -> str:
@@ -21,9 +35,9 @@ class ESIRequest(CachedTask):
         """
         return 'get'
 
-    def ttl_404(self) -> int:
+    def default_ttl(self) -> int:
         """
-        TTL for when cache is unspecified.
+        Default TTL to set in Redis for results that don't have expiry information.
 
         :return: The number of seconds to cache a response
         """
@@ -96,7 +110,7 @@ class ESIRequest(CachedTask):
                                              error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
                                              time=dtparse(rheaders["date"], ignoretz=True)
                                              )
-                return {"error": str(resp.json().get("error")), "error_code": resp.status_code}, self.ttl_404()
+                return {"error": str(resp.json().get("error")), "error_code": resp.status_code}, self.default_ttl()
             else:
                 resp.raise_for_status()
         except Exception as ex:
