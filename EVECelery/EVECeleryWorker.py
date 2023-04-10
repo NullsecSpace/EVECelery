@@ -7,6 +7,7 @@ from EVECelery.tasks.Corporation import *
 from EVECelery.tasks.Market import *
 from EVECelery.tasks.Routes import *
 from EVECelery.tasks.Universe import *
+from EVECelery.tasks.Samples import *
 from EVECelery.clients.ClientRabbitMQ import ClientRabbitMQ
 from EVECelery.clients.ClientRedis import ClientRedisResultBackend
 import os

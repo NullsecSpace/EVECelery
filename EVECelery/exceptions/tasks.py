@@ -1,5 +1,9 @@
-class NotCached(Exception):
+from pydantic import validate_arguments
+from typing import Optional
+
+
+class CachedException(Exception):
     """
-    An exception raised when a task has not previously cached a result with the provided input parameters.
+    An exception that is cached for a period of time.
+
     """
-    pass
