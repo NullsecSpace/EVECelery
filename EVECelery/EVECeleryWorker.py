@@ -25,6 +25,7 @@ class EVECeleryWorker(metaclass=Singleton):
     :param result_port: Redis port - normally 6379
     :param result_db: Redis db - normally 0 for the default db
     :param queue_prefix: Prefix to add to all generated ESI queue names
+    :param worker_log_level: The Celery worker log level for console output
     """
 
     def __init__(self, broker_user: Optional[str] = None, broker_password: Optional[str] = None,
@@ -32,7 +33,7 @@ class EVECeleryWorker(metaclass=Singleton):
                  broker_vhost: Optional[str] = None,
                  result_user: Optional[str] = None, result_password: Optional[str] = None,
                  result_host: Optional[str] = None, result_port: Optional[int] = None, result_db: Optional[int] = None,
-                 queue_prefix: str = "EVECelery.",
+                 queue_prefix: str = "EVECelery.", worker_log_level: Optional[str] = 'ERROR',
                  connection_check: bool = False):
         self.broker = ClientRabbitMQ(user=broker_user, password=broker_password, host=broker_host, port=broker_port,
                                      vhost=broker_vhost)
@@ -44,6 +45,7 @@ class EVECeleryWorker(metaclass=Singleton):
             self.broker.check_connection()
 
         self.max_concurrency = int(os.environ.get('EVECelery_MaxConcurrency', 10))
+        self.worker_log_level = os.environ.get('EVECelery_LogLevel', worker_log_level)
 
         self.queue_prefix = queue_prefix
         self.default_queue = f"{self.queue_prefix}Default"
@@ -123,5 +125,6 @@ class EVECeleryWorker(metaclass=Singleton):
         :return: None
         """
         self.print_header()
-        self.app.start(argv=["worker", "-l", "WARNING", f"-n{self.worker_name}@%h", f"--autoscale={self.max_concurrency},1",
+        self.app.start(argv=["worker", "-l", self.worker_log_level, f"-n{self.worker_name}@%h",
+                             f"--autoscale={self.max_concurrency},1",
                              "-Q", ",".join(self.queues)])

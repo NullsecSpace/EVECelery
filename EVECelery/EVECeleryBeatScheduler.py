@@ -2,7 +2,8 @@ from .EVECeleryWorker import EVECeleryWorker
 
 
 class EVECeleryBeatScheduler(EVECeleryWorker):
-    """Celery beat scheduler for periodic tasks.
+    """
+    Celery beat scheduler for periodic tasks.
 
     """
 
@@ -21,4 +22,4 @@ class EVECeleryBeatScheduler(EVECeleryWorker):
 
     def start(self):
         self.print_header()
-        self.app.start(argv=["beat"])
+        self.app.start(argv=["beat", "-l", self.worker_log_level])
