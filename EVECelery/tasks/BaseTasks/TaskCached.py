@@ -1,16 +1,13 @@
-import json
 from typing import Union, Tuple, Optional
 import hashlib
-from .BaseTask import BaseTask
+from .TaskBase import TaskBase, ModelTaskBaseResponse
 from EVECelery.clients.ClientRedis import ClientRedisLocks, ClientRedisCache
 from EVECelery.exceptions.tasks import CachedException
 import redis
-from pydantic import BaseModel, Field, validator, validate_arguments
-import sys
-import inspect
+from pydantic import Field, validator
 
 
-class ModelCachedResponse(BaseModel):
+class ModelCachedResponse(ModelTaskBaseResponse):
     """
     A cache response pydantic model for validation.
 
@@ -20,19 +17,9 @@ class ModelCachedResponse(BaseModel):
     cache_key: str = Field(default=None, description='The cache key as it exists in Redis.')
     cache_ttl: int = Field(default=None,
                            description='The current cache TTL for a previously cached response or the TTL to set on a result to cache.')
-    pydantic_model: str = Field(default=None,
-                                description='The name of the pydantic model class that this model was initialized with.')
 
     class Config:
         validate_assignment = True
-
-    @validator('pydantic_model', pre=True, always=True)
-    def dynamic_set_pydantic_model(cls, v):
-        return v or cls.class_name()
-
-    @classmethod
-    def class_name(cls) -> str:
-        return cls.__name__
 
 
 class ModelCachedSuccess(ModelCachedResponse):
@@ -52,9 +39,10 @@ class ModelCachedException(ModelCachedResponse):
                                    description='The message for a cached exception.')
 
 
-class CachedTask(BaseTask):
+class TaskCached(TaskBase):
     """
     A task utilizing Redis for some form of caching and locks where the results are cached.
+
     """
 
     @property
@@ -109,39 +97,33 @@ class CachedTask(BaseTask):
         """
         return self.redis_cache.exists(self.get_redis_cache_key(**kwargs)) >= 1
 
-    @validate_arguments
-    def deserialize_to_pydantic(self, json_str: Union[str, dict]) -> Union[ModelCachedResponse, ModelCachedException]:
-        """
-        #todo docs
-        """
-        if isinstance(json_str, str):
-            deserialized_data = json.loads(json_str)
-        else:
-            deserialized_data: dict = json_str
-
-        model_name = deserialized_data.get('pydantic_model')
-        if model_name is None:
-            raise KeyError('The data from Redis did not include the "pydantic_model" attribute. '
-                           'This is required for deserializing previously serialized pydantic model. '
-                           'Insure your model inherits from ModelCachedResponse.')
-        model = getattr(sys.modules[self.__module__], model_name)
-        if not issubclass(model, ModelCachedResponse):
-            raise TypeError('Model must inherit from ModelCachedResponse.')
-        return model.parse_obj(deserialized_data)
-
     def get_sync(self, kwargs_apply_async: Optional[dict] = None, kwargs_get: Optional[dict] = None,
                  **kwargs) -> ModelCachedResponse:
-        return super().get_sync(kwargs_apply_async=kwargs_apply_async, kwargs_get=kwargs_get, **kwargs)
+        r = super().get_sync(kwargs_apply_async=kwargs_apply_async, kwargs_get=kwargs_get, **kwargs)
+        m = self.to_pydantic(r)
+        if not isinstance(m, ModelCachedResponse):
+            raise TypeError('Returned result should inherit from model ModelCachedResponse')
+        return m
 
     def run(self, **kwargs) -> dict:
         """
-        Check that cache first for a result. #todo more docs
+        Returns the result from the Redis cache if it exists, otherwise runs and returns :func:`_run_get_result` as a dictionary.
+
+        This function checks the cache based on the provided input and will return the result from the cache first, skipping a rerun of :func:`_run_get_result`.
+        If the result does not exist in the cache it will run :func:`_run_get_result` and cache the result for future task runs.
+
+        If an exception is raised by :func:`_run_get_result` the exception will be raised to the calling client and will not be cached.
+        If :func:`_run_get_result` returns a :func:`ModelCachedException` then the exception will first be cached and then thrown to the calling client as a :func:`CachedException`.
+
+        :return: The response data as a dictionary.
+            This dictionary can be converted to a pydantic model by passing it to this task's :func:`to_pydantic` method
+            for easier inspection and schema documentation (required fields, field meanings, etc.).
         """
         with self.redis_locks.lock(name=self.get_redis_lock_key(**kwargs), blocking_timeout=15, timeout=300):
             key_cache = self.get_redis_cache_key(**kwargs)
             cached_data: str = self.redis_cache.get(key_cache)
             if cached_data:
-                response_pydantic = self.deserialize_to_pydantic(cached_data)
+                response_pydantic = self.to_pydantic(cached_data)
                 response_pydantic.cache_ttl = self.redis_cache.ttl(key_cache)  # need to return current ttl, not initial
                 response_pydantic.cache_hit = True
             else:
@@ -160,9 +142,15 @@ class CachedTask(BaseTask):
         else:
             return response_pydantic.dict()
 
-    def _run_get_result(self, **kwargs) -> Union[ModelCachedResponse]:
+    def _run_get_result(self, **kwargs) -> Union[ModelCachedResponse, ModelCachedException]:
         """
-        Run method called by task if the result is not cached.
-        :return: A tuple with of (response, cache_ttl)
+        The task body to execute if the result is not currently cached.
+
+        This function is the body of a task that gets executed when a previously returned result is not cached or has expired.
+        This function must return a pydantic model that inherits from :func:`ModelCachedResponse` or :func:`ModelCachedException`.
+
+        If :func:`ModelCachedException` is returned, then the exception will be cached for the defined TTL and have an exception thrown to the calling client.
+
+        :return: The response success or cached exception pydantic model.
         """
         raise NotImplementedError

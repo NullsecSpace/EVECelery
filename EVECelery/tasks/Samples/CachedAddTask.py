@@ -1,13 +1,13 @@
-from EVECelery.tasks.BaseTasks.CachedTask import CachedTask
+from EVECelery.tasks.BaseTasks.TaskCached import TaskCached
 from EVECelery.exceptions.tasks import CachedException
-from EVECelery.tasks.BaseTasks.CachedTask import ModelCachedSuccess, ModelCachedException
+from EVECelery.tasks.BaseTasks.TaskCached import ModelCachedSuccess, ModelCachedException
 
 
 class ModelResponse(ModelCachedSuccess):
     result: float
 
 
-class CachedAddTask(CachedTask):
+class AddTask(TaskCached):
     def _run_get_result(self, a, b):
         try:
             return ModelResponse(result=a + b)

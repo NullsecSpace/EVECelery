@@ -1,13 +1,7 @@
 from celery import Celery, Task
 from .__version__ import __version__, __url__, __license__
-from EVECelery.tasks.BaseTasks.BaseTask import BaseTask
+from EVECelery.tasks.BaseTasks.TaskBase import TaskBase
 from EVECelery.tasks.Alliance import *
-from EVECelery.tasks.Character import *
-from EVECelery.tasks.Corporation import *
-from EVECelery.tasks.Market import *
-from EVECelery.tasks.Routes import *
-from EVECelery.tasks.Universe import *
-from EVECelery.tasks.Samples import *
 from EVECelery.clients.ClientRabbitMQ import ClientRabbitMQ
 from EVECelery.clients.ClientRedis import ClientRedisResultBackend
 import os
@@ -83,7 +77,7 @@ class EVECeleryWorker(metaclass=Singleton):
 
         This method will register and initialize all subtasks that inherit from BaseTask.
         """
-        for t in BaseTask.get_all_subtasks():
+        for t in TaskBase.get_all_subtasks():
             task = t()
             self.app.register_task(task)
             if hasattr(task, 'queue_assignment') and task.queue_assignment is not None:

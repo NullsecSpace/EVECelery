@@ -1,1 +1,1 @@
-from .CachedAddTask import CachedAddTask
+from .CachedAddTask import AddTask

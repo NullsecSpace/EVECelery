@@ -4,10 +4,10 @@ import requests
 from datetime import datetime
 from dateutil.parser import parse as dtparse
 from typing import Union, Tuple
-from .CachedTask import CachedTask
+from .TaskCached import TaskCached
 
 
-class ESIRequest(CachedTask):
+class TaskESI(TaskCached):
     autoretry_for = (Exception,)
     max_retries = 3
     retry_backoff = 5

@@ -1,7 +1,7 @@
-from EVECelery.tasks.BaseTasks.ESIResqust import ESIRequest
+from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
 
 
-class AllianceInfo(ESIRequest):
+class AllianceInfo(TaskESI):
     def default_ttl(self) -> int:
         return 3600  # current esi x-cached-seconds header
 
