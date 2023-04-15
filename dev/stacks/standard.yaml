@@ -1,11 +1,10 @@
 # dev testing deployment - ensure you are at root of git repo.
-# deployment windows:   docker stack deploy -c .\dev\stacks\standard.yaml insightdev-standard
-# deployment linux:     docker stack deploy -c ./dev/stacks/standard.yaml insightdev-standard
+# deployment linux:     docker compose -p evecelery-dev -f ./dev/stacks/standard.yaml up -d --pull always
 
 version: '3.8'
 services:
   rabbitmq:
-    image: rabbitmq:3-management
+    image: docker.io/library/rabbitmq:3-management
     deploy:
       mode: replicated
       replicas: 1
@@ -16,9 +15,9 @@ services:
           memory: 2048M
     hostname: insightmq
     environment:
-      RABBITMQ_DEFAULT_USER: "insight"
-      RABBITMQ_DEFAULT_PASS: "insightdev"
-      RABBITMQ_DEFAULT_VHOST: "insight"
+      RABBITMQ_DEFAULT_USER: "evecelery"
+      RABBITMQ_DEFAULT_PASS: "evecelery"
+      RABBITMQ_DEFAULT_VHOST: "evecelery"
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     networks:
@@ -33,7 +32,7 @@ services:
         protocol: tcp
         mode: host
   redis:
-    image: redis:6.2.6
+    image: docker.io/library/redis:6
     deploy:
       mode: replicated
       replicas: 1
@@ -48,7 +47,7 @@ services:
         published: 6379
         protocol: tcp
         mode: host
-    command: --requirepass "insightdev" --appendonly yes --appendfsync everysec
+    command: --requirepass "evecelery" --appendonly yes --appendfsync everysec
 networks:
   insightdev:
 volumes:

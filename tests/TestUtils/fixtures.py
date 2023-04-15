@@ -34,7 +34,7 @@ def server_rabbitmq(docker_services_cleanup):
          'pass': 'EVECeleryPass',
          'vhost': 'EVECeleryVHost'
          }
-    c = client.containers.run('rabbitmq:3-management',
+    c = client.containers.run('docker.io/library/rabbitmq:3-management',
                               auto_remove=True,
                               hostname='evecelerytests-rabbitmq',
                               environment={
@@ -71,7 +71,7 @@ def server_redis(docker_services_cleanup):
          'pass': 'EVECelery'
          }
     client = docker.from_env()
-    c = client.containers.run('redis:6',
+    c = client.containers.run('docker.io/library/redis:6',
                               auto_remove=True,
                               hostname='evecelerytests-redis',
                               command=f'--requirepass "{d["pass"]}" --appendonly yes --appendfsync everysec',
