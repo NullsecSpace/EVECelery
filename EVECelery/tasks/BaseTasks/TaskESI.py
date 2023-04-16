@@ -17,6 +17,10 @@ class TaskESI(TaskCached):
     retry_jitter = True
     soft_time_limit = 30
 
+    def __init__(self):
+        super().__init__()
+        self.name = '.'.join(self.__module__.split('.')[-3:])
+
     @property
     def queue_assignment(self) -> str | None:
         """
@@ -105,7 +109,7 @@ class TaskESI(TaskCached):
                                              error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
                                              time=dtparse(rheaders["date"], ignoretz=True)
                                              )
-                response_model = self.reflection_get_model(f'ResponseSuccess{resp.status_code}_{self.name}')
+                response_model = self.reflection_get_model(f'ResponseSuccess{resp.status_code}_{self.__name__}')
                 response_data = resp.json()
                 if isinstance(response_data, dict):
                     return response_model(cache_ttl=ttl_expire, headers=resp.headers, **response_data)
