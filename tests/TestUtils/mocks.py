@@ -2,7 +2,7 @@ import pytest
 import random
 from .fixtures import server_rabbitmq, server_redis
 from EVECelery.tasks.BaseTasks.TaskBase import TaskBase
-from EVECelery.tasks.Alliance import *
+from EVECelery.tasks import TasksESI
 from EVECelery.tasks.Samples import *
 
 
