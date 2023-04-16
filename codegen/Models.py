@@ -154,7 +154,7 @@ class ModelResponse(BaseModel):
         elif body_schema.get('type') == 'array':
             m = ModelProperty(name='items',
                               type=extract_type(d),
-                              description=body_schema.get('title')
+                              description=d.get('description')
                               )
             body_properties.append(m)
         else:

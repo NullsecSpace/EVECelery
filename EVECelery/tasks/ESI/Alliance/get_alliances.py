@@ -47,7 +47,7 @@ class ResponseSuccess200_get_alliances(ModelCachedSuccess):
     headers: ResponseSuccessHeaders200_get_alliances = Field(
         ..., description='The response headers for this request.'
     )
-    items: list[int] | None = Field(description="get_alliances_ok")
+    items: list[int] | None = Field(description="List of Alliance IDs")
 
 
 class get_alliances(TaskESI):

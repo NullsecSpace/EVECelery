@@ -48,9 +48,7 @@ class ResponseSuccess200_get_alliances_alliance_id_corporations(ModelCachedSucce
     headers: ResponseSuccessHeaders200_get_alliances_alliance_id_corporations = Field(
         ..., description='The response headers for this request.'
     )
-    items: list[int] | None = Field(
-        description="get_alliances_alliance_id_corporations_ok"
-    )
+    items: list[int] | None = Field(description="List of corporation IDs")
 
 
 class get_alliances_alliance_id_corporations(TaskESI):

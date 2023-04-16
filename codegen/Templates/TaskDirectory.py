@@ -27,6 +27,7 @@ class TaskDirectory(object):
         :class:`~EVECelery.tasks.ESI.{{package_name}}.{{ m }}.{{ m }}`
         for usage of this task, the required parameters, and additional information.
 
+
         :return: The Celery task
         """
         return {{ m }}()

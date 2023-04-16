@@ -1,7 +1,7 @@
 from celery import Celery, Task
 from .__version__ import __version__, __url__, __license__
 from EVECelery.tasks.BaseTasks.TaskBase import TaskBase
-from EVECelery.tasks import TasksESI
+from EVECelery.tasks import TaskDirectory
 from EVECelery.clients.ClientRabbitMQ import ClientRabbitMQ
 from EVECelery.clients.ClientRedis import ClientRedisResultBackend
 import os
@@ -74,8 +74,8 @@ class EVECeleryWorker(metaclass=Singleton):
         }
 
     @property
-    def TasksESI(self) -> TasksESI:
-        return TasksESI()
+    def tasks(self) -> TaskDirectory:
+        return TaskDirectory()
 
     def _register_all_tasks(self):
         """

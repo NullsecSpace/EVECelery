@@ -31,6 +31,7 @@ class TaskDirectory(object):
         :class:`~EVECelery.tasks.ESI.Alliance.get_alliances.get_alliances`
         for usage of this task, the required parameters, and additional information.
 
+
         :return: The Celery task
         """
         return get_alliances()
@@ -45,6 +46,7 @@ class TaskDirectory(object):
         :func:`~EVECelery.tasks.ESI.Alliance.get_alliances_alliance_id.get_alliances_alliance_id.run`, and
         :class:`~EVECelery.tasks.ESI.Alliance.get_alliances_alliance_id.get_alliances_alliance_id`
         for usage of this task, the required parameters, and additional information.
+
 
         :return: The Celery task
         """
@@ -63,6 +65,7 @@ class TaskDirectory(object):
         :class:`~EVECelery.tasks.ESI.Alliance.get_alliances_alliance_id_corporations.get_alliances_alliance_id_corporations`
         for usage of this task, the required parameters, and additional information.
 
+
         :return: The Celery task
         """
         return get_alliances_alliance_id_corporations()
@@ -77,6 +80,7 @@ class TaskDirectory(object):
         :func:`~EVECelery.tasks.ESI.Alliance.get_alliances_alliance_id_icons.get_alliances_alliance_id_icons.run`, and
         :class:`~EVECelery.tasks.ESI.Alliance.get_alliances_alliance_id_icons.get_alliances_alliance_id_icons`
         for usage of this task, the required parameters, and additional information.
+
 
         :return: The Celery task
         """
