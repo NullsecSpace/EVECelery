@@ -5,12 +5,14 @@ This module was automatically generated from Jinja templates with the codegen to
 You should not directly modify this module but instead modify the template 'codegen/Templates/ESI_Task.py'.
 """
 
-from EVECelery.tasks.BaseTasks.ESIResqust import ESIRequest
+from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
+from EVECelery.tasks.BaseTasks.TaskBase import ModelTaskBaseResponse
+from EVECelery.tasks.BaseTasks.TaskCached import ModelCachedSuccess, ModelCachedException
 from pydantic import BaseModel, Field, validate_arguments
-from typing import Union
+from typing import Union, Optional
 
 {% for r in m.responses_success -%}
-class ResponseHeaders{{ r.code }}(BaseModel):
+class ResponseSuccessHeaders{{ r.code }}_{{ m.class_name }}(ModelTaskBaseResponse):
     """
     Headers for response code {{ r.code }}
     """
@@ -21,7 +23,7 @@ class ResponseHeaders{{ r.code }}(BaseModel):
     pass
     {% endfor %}
 
-class {{ r.modelClassName }}(BaseModel):
+class ResponseSuccess{{ r.code }}_{{ m.class_name }}(ModelCachedSuccess):
     """
     {{ r.description | indent(width=4)}}
 
@@ -32,7 +34,7 @@ class {{ r.modelClassName }}(BaseModel):
 
     """
 
-    headers: ResponseHeaders{{ r.code }} = Field(..., description='The response headers for this request.')
+    headers: ResponseSuccessHeaders{{ r.code }}_{{ m.class_name }} = Field(..., description='The response headers for this request.')
     {% for p in r.body_properties -%}
     {{p.pydantic_field}}
     {% else %}
@@ -41,7 +43,7 @@ class {{ r.modelClassName }}(BaseModel):
 {% endfor %}
 
 
-class {{ m.class_name }}(ESIRequest):
+class {{ m.class_name }}(TaskESI):
     """
     {{ m.summary | indent(width=4)}}
     """
@@ -51,6 +53,7 @@ class {{ m.class_name }}(ESIRequest):
         Returns the type of request made to ESI
 
         This method will return the request method (get, post, etc.) made to ESI.
+
         :return: Request method passed to requests.request()
         """
         return "{{ m.method }}"
@@ -75,8 +78,40 @@ class {{ m.class_name }}(ESIRequest):
         return {{ m.default_cache_ttl }}  # current esi x-cached-seconds header
 
     @validate_arguments
-    def run(self, {{ m.requestParams|join(', ', attribute='function_param') }}{{ ', **kwargs' if m.requestParams |length > 0  else '**kwargs' }}) -> Union[{{ m.responses_success|join(', ', attribute='modelClassName') }}]:
+    def get_sync(self, {{ m.requestParams|join(', ', attribute='function_param') }}{{ ',' if m.requestParams |length > 0  else '' }}kwargs_apply_async: Optional[dict] = None, kwargs_get: Optional[dict] = None) -> None:
         """
+        {{ m.summary | indent(width=8)}}
+
+        {{ m.description | indent(width=8)}}
+
+
+        NOTE: This function calls the task and blocks until the result is available. This function is a wrapper around Celery's `task.apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_
+        and `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_ methods.
+        Instead of a dictionary, this function returns a pydantic model to more easily see what returned data responses look like, what is optionally returned, etc.
+
+        If you would instead like to return an async result, use Celery's `apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_ method on this task.
+
+        {% for i in m.requestParams -%}
+        {{ i.function_docstring|indent(width=8) }}
+        {% endfor -%}
+        :param Optional[dict] kwargs_apply_async: Dictionary of keyword arguments passed to `task.apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_
+        :param Optional[dict] kwargs_get: Dictionary of keyword arguments passed to `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_
+        :return: The response from ESI as a pydantic object.
+        """
+        return super().get_sync({{ m.requestParams|join(', ', attribute='param_pass') }}{{ ',' if m.requestParams |length > 0  else '' }}kwargs_apply_async=kwargs_apply_async, kwargs_get=kwargs_get)
+
+    @validate_arguments
+    def run(self, {{ m.requestParams|join(', ', attribute='function_param') }}{{ ',' if m.requestParams |length > 0  else '' }}**kwargs) -> dict:
+        """
+        The task body that runs on the EVECelery worker
+
+        This is the task body that runs on the EVECelery worker.
+
+        IMPORTANT NOTE: You should not directly call this function from your client code as it will run within the context of your client and won't be sent to the message broker to run on a worker node.
+        To correctly call this task body, see `Celery's documentation <https://docs.celeryq.dev/en/stable/userguide/calling.html>`_ on methods for calling tasks.
+
+        See also this task's :func:`get_sync` which is a wrapper function around Celery's apply_async().get() call.
+
         {{ m.summary | indent(width=8)}}
 
         {{ m.description | indent(width=8)}}
@@ -84,5 +119,6 @@ class {{ m.class_name }}(ESIRequest):
         {% for i in m.requestParams -%}
         {{ i.function_docstring|indent(width=8) }}
         {% endfor %}
+        :return: The response from ESI as a JSON dictionary.
         """
         return super().run({{ m.requestParams|join(', ', attribute='param_pass') }}{{ ', **kwargs' if m.requestParams |length > 0  else '**kwargs' }})
