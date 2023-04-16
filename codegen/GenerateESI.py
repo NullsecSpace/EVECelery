@@ -1,5 +1,6 @@
+import os
+import shutil
 from jinja2 import Environment, FileSystemLoader, select_autoescape, StrictUndefined
-import json
 from Models import *
 import warnings
 import black
@@ -73,6 +74,33 @@ class GenerateAPI:
         ))
         self.templates_rendered['TaskDirectory'] = root_task_directory
 
+    def write_files(self):
+        task_base = 'EVECelery/tasks'
+        task_esi_path = f'{task_base}/ESI'
+        try:
+            shutil.rmtree(task_esi_path)
+        except FileNotFoundError as ex:
+            if not os.path.isdir(task_base):
+                print(f'Unable to find path {task_base} relative to to the current working directory. Ensure it exists.')
+                raise ex
+        os.mkdir(task_esi_path)
+        with open(f'{task_esi_path}/__init__.py', 'w') as f:
+            f.write('')
+        for package, package_contents in self.templates_rendered.items():
+            if isinstance(package_contents, dict):
+                package_path = f'{task_esi_path}/{package}'
+                os.mkdir(package_path)
+                with open(f'{package_path}/__init__.py', 'w') as f:
+                    f.write('')
+                for module, module_contents in package_contents.items():
+                    with open(f'{package_path}/{module}.py', 'w') as f:
+                        f.write(module_contents)
+            elif isinstance(package_contents, str):
+                with open(f'{task_esi_path}/{package}.py', 'w') as f:
+                    f.write(package_contents)
+            else:
+                warnings.warn(f'Unknown type for writing files: {type(package_contents)}')
+
     def print_summary(self):
         print(f'Total templates rendered successfully: {self.total_templates_success}\n'
               f'Total templates that failed to render / skipped: {self.total_templates_fail}')
@@ -83,4 +111,5 @@ class GenerateAPI:
         g.generate_template_models()
         g.render_templates()
         g.render_task_directory_templates()
+        g.write_files()
         g.print_summary()

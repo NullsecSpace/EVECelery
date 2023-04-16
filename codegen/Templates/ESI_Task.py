@@ -78,7 +78,7 @@ class {{ m.class_name }}(TaskESI):
         return {{ m.default_cache_ttl }}  # current esi x-cached-seconds header
 
     @validate_arguments
-    def get_sync(self, {{ m.requestParams|join(', ', attribute='function_param') }}{{ ',' if m.requestParams |length > 0  else '' }}kwargs_apply_async: Optional[dict] = None, kwargs_get: Optional[dict] = None) -> None:
+    def get_sync(self, {{ m.requestParams|join(', ', attribute='function_param') }}{{ ',' if m.requestParams |length > 0  else '' }}kwargs_apply_async: Optional[dict] = None, kwargs_get: Optional[dict] = None):
         """
         {{ m.summary | indent(width=8)}}
 
