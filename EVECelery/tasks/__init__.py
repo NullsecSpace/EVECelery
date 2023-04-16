@@ -1,1 +1,1 @@
-from .ESI.AttributeInjection import AttributeInjection as TasksESI
+from .ESI.TaskDirectory import TaskDirectory as TasksESI

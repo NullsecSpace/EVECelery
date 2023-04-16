@@ -1,7 +1,7 @@
 from celery import Celery, Task
 from .__version__ import __version__, __url__, __license__
 from EVECelery.tasks.BaseTasks.TaskBase import TaskBase
-from EVECelery.tasks.Alliance import *
+from EVECelery.tasks import TasksESI
 from EVECelery.clients.ClientRabbitMQ import ClientRabbitMQ
 from EVECelery.clients.ClientRedis import ClientRedisResultBackend
 import os
@@ -72,6 +72,10 @@ class EVECeleryWorker(metaclass=Singleton):
             'task_default_queue': self.default_queue,
             'result_expires': 5400  # default
         }
+
+    @property
+    def TasksESI(self) -> TasksESI:
+        return TasksESI()
 
     def _register_all_tasks(self):
         """

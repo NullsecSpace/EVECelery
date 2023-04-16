@@ -1,1 +1,0 @@
-from .AllianceInfo import AllianceInfo
