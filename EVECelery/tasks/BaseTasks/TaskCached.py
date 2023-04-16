@@ -4,7 +4,7 @@ from .TaskBase import TaskBase, ModelTaskBaseResponse
 from EVECelery.clients.ClientRedis import ClientRedisLocks, ClientRedisCache
 from EVECelery.exceptions.tasks import CachedException
 import redis
-from pydantic import Field, validator
+from pydantic import Field
 
 
 class ModelCachedResponse(ModelTaskBaseResponse):
@@ -17,9 +17,6 @@ class ModelCachedResponse(ModelTaskBaseResponse):
     cache_key: str = Field(default=None, description='The cache key as it exists in Redis.')
     cache_ttl: int = Field(default=None,
                            description='The current cache TTL for a previously cached response or the TTL to set on a result to cache.')
-
-    class Config:
-        validate_assignment = True
 
 
 class ModelCachedSuccess(ModelCachedResponse):
@@ -99,6 +96,8 @@ class TaskCached(TaskBase):
 
     def get_sync(self, kwargs_apply_async: Optional[dict] = None, kwargs_get: Optional[dict] = None,
                  **kwargs) -> ModelCachedResponse:
+        if kwargs is None:
+            kwargs = {}
         r = super().get_sync(kwargs_apply_async=kwargs_apply_async, kwargs_get=kwargs_get, **kwargs)
         m = self.to_pydantic(r)
         if not isinstance(m, ModelCachedResponse):

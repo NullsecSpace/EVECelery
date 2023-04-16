@@ -3,12 +3,14 @@ from EVECelery.utils.RequestHeaders import RequestHeaders
 import requests
 from datetime import datetime
 from dateutil.parser import parse as dtparse
-from typing import Union, Tuple
-from .TaskCached import TaskCached
+from typing import Union
+from .TaskCached import TaskCached, ModelCachedSuccess, ModelCachedException
+from requests.exceptions import RequestException
+from redis.exceptions import RedisError
 
 
 class TaskESI(TaskCached):
-    autoretry_for = (Exception,)
+    autoretry_for = (RequestException, RedisError)
     max_retries = 3
     retry_backoff = 5
     retry_backoff_max = 60
@@ -69,7 +71,7 @@ class TaskESI(TaskCached):
         """
         return f"{self.base_url()}{self.route(**kwargs)}"
 
-    def _run_get_result(self, **kwargs) -> Tuple[Union[list, str, dict], int]:
+    def _run_get_result(self, **kwargs) -> Union[ModelCachedSuccess, ModelCachedException]:
         """Gets the ESI cached response.
         If the response is not yet cached or hasn't been resolved then perform an ESI call caching the new response.
 
@@ -90,10 +92,10 @@ class TaskESI(TaskCached):
         ESIErrorLimiter.check_limit(self.redis_cache)
         rheaders = {}
         try:
-            resp = requests.request(self.request_method(), self.request_url(**kwargs), headers=RequestHeaders.get_headers(), timeout=5, verify=True)
+            resp = requests.request(self.request_method(), self.request_url(**kwargs),
+                                    headers=RequestHeaders.get_headers(), timeout=15, verify=True)
             rheaders = resp.headers
-            if resp.status_code == 200:
-                d = resp.json()
+            if 200 <= resp.status_code < 300:
                 ttl_expire = int(max(
                     (dtparse(rheaders["expires"], ignoretz=True) - datetime.utcnow()).total_seconds(),
                     1)
@@ -103,16 +105,23 @@ class TaskESI(TaskCached):
                                              error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
                                              time=dtparse(rheaders["date"], ignoretz=True)
                                              )
-                return d, ttl_expire
-            elif resp.status_code == 400 or resp.status_code == 404:
+                response_model = self.reflection_get_model(f'ResponseSuccess{resp.status_code}_{self.name}')
+                response_data = resp.json()
+                if isinstance(response_data, dict):
+                    return response_model(cache_ttl=ttl_expire, headers=resp.headers, **response_data)
+                else:  # list response
+                    return response_model(cache_ttl=ttl_expire, headers=resp.headers, items=response_data)
+            elif 400 <= resp.status_code < 500:
                 ESIErrorLimiter.update_limit(self.redis_cache,
                                              error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
                                              error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
                                              time=dtparse(rheaders["date"], ignoretz=True)
                                              )
-                return {"error": str(resp.json().get("error")), "error_code": resp.status_code}, self.default_ttl()
+                msg = f'{resp.status_code} - {resp.json()}'
+                return ModelCachedException(exception_message=msg)
             else:
                 resp.raise_for_status()
+                raise ValueError(f'Unhandled response code {resp.status_code}')
         except Exception as ex:
             try:
                 ESIErrorLimiter.update_limit(self.redis_cache,

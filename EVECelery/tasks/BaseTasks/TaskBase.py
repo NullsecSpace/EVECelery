@@ -15,6 +15,10 @@ class ModelTaskBaseResponse(BaseModel):
     pydantic_model: str = Field(default=None,
                                 description='The name of the pydantic model class that this model was initialized with.')
 
+    class Config:
+        validate_assignment = True
+        allow_population_by_field_name = True
+
     @validator('pydantic_model', pre=True, always=True)
     def dynamic_set_pydantic_model(cls, v):
         return v or cls.class_name()
@@ -96,7 +100,7 @@ class TaskBase(Task):
         model = cls.reflection_get_model(deserialized_data.get('pydantic_model'))
         if not issubclass(model, ModelTaskBaseResponse):
             raise TypeError('Lookup model must inherit from ModelCachedResponse.')
-        return model.parse_obj(deserialized_data)
+        return model(**deserialized_data)
 
     @validate_arguments
     def get_sync(self, kwargs_apply_async: Optional[dict] = None, kwargs_get: Optional[dict] = None, **kwargs):
