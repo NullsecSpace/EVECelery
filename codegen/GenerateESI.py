@@ -4,7 +4,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape, StrictUndef
 from Models import *
 import warnings
 import black
-
+import requests
 
 class GenerateAPI:
     def __init__(self):
@@ -18,9 +18,19 @@ class GenerateAPI:
         self.total_templates_fail = 0
 
     @classmethod
-    def get_swagger_spec(cls, url: str = None) -> dict:
-        with open('swagger.json', 'r') as f:
-            return json.load(f)
+    def get_swagger_spec(cls, url: str = 'https://esi.evetech.net/latest/swagger.json') -> dict:
+        try:
+            r = requests.get(url, verify=True, timeout=60)
+            r.raise_for_status()
+            if r.status_code == 200:
+                return r.json()
+            else:
+                raise Exception(f'Unexpected response code {r.status_code} when downloading ESI Swagger spec.')
+        except Exception as ex:
+            print(ex)
+            warnings.warn('Error when downloading ESI Swagger spac. Falling back to loading local swagger.json if it exists.')
+            with open('swagger.json', 'r') as f:
+                return json.load(f)
 
     def generate_template_models(self):
         for path_str, path in self.esi_schema['paths'].items():
@@ -102,7 +112,7 @@ class GenerateAPI:
                 warnings.warn(f'Unknown type for writing files: {type(package_contents)}')
 
     def print_summary(self):
-        print(f'Total templates rendered successfully: {self.total_templates_success}\n'
+        print(f'Total templates written successfully: {self.total_templates_success}\n'
               f'Total templates that failed to render / skipped: {self.total_templates_fail}')
 
     @classmethod
