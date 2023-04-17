@@ -1,3 +1,12 @@
+{% set model_names = [] %}
+{% for r in m.responses_success %}
+{{ model_names.append('Success%s_%s'| format(r.code, m.class_name)) or ''}}
+{% endfor %}
+
+{% set model_docstring_links = [] %}
+{% for m in model_names %}
+{{ model_docstring_links.append(':class:`%s`'| format(m)) or ''}}
+{% endfor %}
 """
 A task definition module with associated response models returned by the task.
 
@@ -12,7 +21,7 @@ from pydantic import BaseModel, Field, validate_arguments
 from typing import Union, Optional
 
 {% for r in m.responses_success -%}
-class ResponseSuccessHeaders{{ r.code }}_{{ m.class_name }}(ModelTaskBaseResponse):
+class SuccessHeaders{{ r.code }}_{{ m.class_name }}(ModelTaskBaseResponse):
     """
     Headers for response code {{ r.code }}
     """
@@ -23,18 +32,21 @@ class ResponseSuccessHeaders{{ r.code }}_{{ m.class_name }}(ModelTaskBaseRespons
     pass
     {% endfor %}
 
-class ResponseSuccess{{ r.code }}_{{ m.class_name }}(ModelCachedSuccess):
+class Success{{ r.code }}_{{ m.class_name }}(ModelCachedSuccess):
     """
     {{ r.description | indent(width=4)}}
 
     Response for response code {{ r.code }}. This is the response body model that also contains the headers.
 
-    --Example responses from ESI:
-    {{ r.example | indent(width=4)}}
+    Example responses from ESI:
+
+    .. code-block:: json
+
+        {{ r.example | indent(width=8)}}
 
     """
 
-    headers: ResponseSuccessHeaders{{ r.code }}_{{ m.class_name }} = Field(..., description='The response headers for this request.')
+    headers: SuccessHeaders{{ r.code }}_{{ m.class_name }} = Field(..., description='The response headers for this request.')
     {% for p in r.body_properties -%}
     {{p.pydantic_field}}
     {% else %}
@@ -78,7 +90,7 @@ class {{ m.class_name }}(TaskESI):
         return {{ m.default_cache_ttl }}  # current esi x-cached-seconds header
 
     @validate_arguments
-    def get_sync(self, {{ m.requestParams|join(', ', attribute='function_param') }}{{ ',' if m.requestParams |length > 0  else '' }}kwargs_apply_async: Optional[dict] = None, kwargs_get: Optional[dict] = None):
+    def get_sync(self, {{ m.requestParams|join(', ', attribute='function_param') }}{{ ',' if m.requestParams |length > 0  else '' }}kwargs_apply_async: Optional[dict] = None, kwargs_get: Optional[dict] = None) -> Union[{{ model_names|join(', ') }}]:
         """
         {{ m.summary | indent(width=8)}}
 
@@ -96,7 +108,7 @@ class {{ m.class_name }}(TaskESI):
         {% endfor -%}
         :param Optional[dict] kwargs_apply_async: Dictionary of keyword arguments passed to `task.apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_
         :param Optional[dict] kwargs_get: Dictionary of keyword arguments passed to `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_
-        :return: The response from ESI as a pydantic object.
+        :return: The response from ESI as a pydantic object. The response model will follow the structure of {{ model_docstring_links | join(' or ') }}.
         """
         return super().get_sync({{ m.requestParams|join(', ', attribute='param_pass') }}{{ ',' if m.requestParams |length > 0  else '' }}kwargs_apply_async=kwargs_apply_async, kwargs_get=kwargs_get)
 
@@ -119,6 +131,6 @@ class {{ m.class_name }}(TaskESI):
         {% for i in m.requestParams -%}
         {{ i.function_docstring|indent(width=8) }}
         {% endfor %}
-        :return: The response from ESI as a JSON dictionary.
+        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of {{ model_docstring_links | join(' or ') }}.
         """
         return super().run({{ m.requestParams|join(', ', attribute='param_pass') }}{{ ', **kwargs' if m.requestParams |length > 0  else '**kwargs' }})

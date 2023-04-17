@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field, validate_arguments
 from typing import Union, Optional
 
 
-class ResponseSuccessHeaders200_get_alliances(ModelTaskBaseResponse):
+class SuccessHeaders200_get_alliances(ModelTaskBaseResponse):
     """
     Headers for response code 200
     """
@@ -30,21 +30,24 @@ class ResponseSuccessHeaders200_get_alliances(ModelTaskBaseResponse):
     )
 
 
-class ResponseSuccess200_get_alliances(ModelCachedSuccess):
+class Success200_get_alliances(ModelCachedSuccess):
     """
     List of Alliance IDs
 
     Response for response code 200. This is the response body model that also contains the headers.
 
-    --Example responses from ESI:
-    [
-      99000001,
-      99000002
-    ]
+    Example responses from ESI:
+
+    .. code-block:: json
+
+        [
+          99000001,
+          99000002
+        ]
 
     """
 
-    headers: ResponseSuccessHeaders200_get_alliances = Field(
+    headers: SuccessHeaders200_get_alliances = Field(
         ..., description='The response headers for this request.'
     )
     items: list[int] | None = Field(description="List of Alliance IDs")
@@ -88,7 +91,7 @@ class get_alliances(TaskESI):
         datasource: str = "tranquility",
         kwargs_apply_async: Optional[dict] = None,
         kwargs_get: Optional[dict] = None,
-    ):
+    ) -> Union[Success200_get_alliances]:
         """
         List all alliances
 
@@ -116,7 +119,7 @@ class get_alliances(TaskESI):
         :param datasource: The server name you would like data from -- ['tranquility']
         :param Optional[dict] kwargs_apply_async: Dictionary of keyword arguments passed to `task.apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_
         :param Optional[dict] kwargs_get: Dictionary of keyword arguments passed to `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_
-        :return: The response from ESI as a pydantic object.
+        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Success200_get_alliances`.
         """
         return super().get_sync(
             datasource=datasource,
@@ -154,6 +157,6 @@ class get_alliances(TaskESI):
 
         :param datasource: The server name you would like data from -- ['tranquility']
 
-        :return: The response from ESI as a JSON dictionary.
+        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Success200_get_alliances`.
         """
         return super().run(datasource=datasource, **kwargs)
