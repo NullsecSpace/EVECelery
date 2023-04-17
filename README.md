@@ -8,8 +8,7 @@
 EVECelery is a distributed task queue framework for building tools that interact with
 the [EVE Online ESI API](https://esi.evetech.net/ui) using Celery, RabbitMQ, and Redis.
 
-With EVECelery you can easily distribute ESI calls across task queues built on top
-of [Celery](https://docs.celeryq.dev/) with a fleet of worker nodes.
+With EVECelery you can easily distribute ESI calls and tasks across a fleet of worker nodes built using [Celery](https://docs.celeryq.dev/).
 You can create your own tasks on top of EVECelery defining custom functions and scheduled jobs that run alongside the included tasks.
 
 NOTE: This software is in development and may rapidly change or have breaking bugs until the v1.0 release is ready.
@@ -23,7 +22,7 @@ Ensure you use version pinning in your ```requirements.txt```.
 * Distributed locking system with Redis ensures stateless workers won't make duplicate API calls if multiple clients run tasks with matching parameters at the same time
 * Cache integration with Redis that caches ESI responses
 * Easily define your own Celery tasks to register with the EVECelery worker nodes
-* Client support for obtaining results synchronously or asynchronously. See [calling tasks]([Celery](https://docs.celeryq.dev/))
+* Client support for obtaining results synchronously or asynchronously. See [Celery calling tasks](https://docs.celeryq.dev/) for docs on calling tasks.
 * Automated task retry and distributed error rate control limiting across the worker fleet
 * ESI task API designed to mirror the [ESI Swagger Spec](https://esi.evetech.net/ui/) with the same parameter names, responses, and documentation for easy development and code completion
 * Support for periodic scheduled tasks making use of the [Celery beat scheduler](https://docs.celeryq.dev/en/stable/userguide/periodic-tasks.html)
