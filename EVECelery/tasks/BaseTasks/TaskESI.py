@@ -109,7 +109,7 @@ class TaskESI(TaskCached):
                                              error_limit_reset=int(rheaders["x-esi-error-limit-reset"]),
                                              time=dtparse(rheaders["date"], ignoretz=True)
                                              )
-                response_model = self.reflection_get_model(f'ResponseSuccess{resp.status_code}_{self.__name__}')
+                response_model = self.reflection_get_model(f'Success{resp.status_code}_{self.__name__}')
                 response_data = resp.json()
                 if isinstance(response_data, dict):
                     return response_model(cache_ttl=ttl_expire, headers=resp.headers, **response_data)
