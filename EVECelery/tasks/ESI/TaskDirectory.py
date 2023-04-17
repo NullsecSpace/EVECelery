@@ -7,9 +7,10 @@ You should not directly modify this module but instead modify the template 'code
 """
 
 from .Alliance.TaskDirectory import TaskDirectory as AllianceTaskDirectory
+from .Character.TaskDirectory import TaskDirectory as CharacterTaskDirectory
 from .Skills.TaskDirectory import TaskDirectory as SkillsTaskDirectory
 from .Calendar.TaskDirectory import TaskDirectory as CalendarTaskDirectory
-from .Character.TaskDirectory import TaskDirectory as CharacterTaskDirectory
+from .Contacts.TaskDirectory import TaskDirectory as ContactsTaskDirectory
 from .Fleets.TaskDirectory import TaskDirectory as FleetsTaskDirectory
 from .Clones.TaskDirectory import TaskDirectory as ClonesTaskDirectory
 from .Location.TaskDirectory import TaskDirectory as LocationTaskDirectory
@@ -46,6 +47,17 @@ class TaskDirectory(object):
         return AllianceTaskDirectory()
 
     @property
+    def Character(self) -> CharacterTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Character"
+
+
+        :return: The task directory for all Character ESI tasks
+
+        """
+        return CharacterTaskDirectory()
+
+    @property
     def Skills(self) -> SkillsTaskDirectory:
         """
         Subdirectory for ESI tasks categorized as "Skills"
@@ -68,15 +80,15 @@ class TaskDirectory(object):
         return CalendarTaskDirectory()
 
     @property
-    def Character(self) -> CharacterTaskDirectory:
+    def Contacts(self) -> ContactsTaskDirectory:
         """
-        Subdirectory for ESI tasks categorized as "Character"
+        Subdirectory for ESI tasks categorized as "Contacts"
 
 
-        :return: The task directory for all Character ESI tasks
+        :return: The task directory for all Contacts ESI tasks
 
         """
-        return CharacterTaskDirectory()
+        return ContactsTaskDirectory()
 
     @property
     def Fleets(self) -> FleetsTaskDirectory:

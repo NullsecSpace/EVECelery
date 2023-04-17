@@ -6,6 +6,7 @@ You should not directly modify this module but instead modify the template 'code
 """
 
 from .get_corporations_npccorps import get_corporations_npccorps
+from .get_corporations_corporation_id import get_corporations_corporation_id
 from .get_corporations_corporation_id_icons import get_corporations_corporation_id_icons
 from .get_corporations_corporation_id_members import (
     get_corporations_corporation_id_members,
@@ -34,6 +35,22 @@ class TaskDirectory(object):
         :return: The Celery task
         """
         return get_corporations_npccorps()
+
+    @property
+    def get_corporations_corporation_id(self) -> get_corporations_corporation_id:
+        """
+        Get corporation information
+
+
+        Reference the docstrings for :func:`~EVECelery.tasks.ESI.Corporation.get_corporations_corporation_id.get_corporations_corporation_id.get_sync`,
+        :func:`~EVECelery.tasks.ESI.Corporation.get_corporations_corporation_id.get_corporations_corporation_id.run`, and
+        :class:`~EVECelery.tasks.ESI.Corporation.get_corporations_corporation_id.get_corporations_corporation_id`
+        for usage of this task, the required parameters, and additional information.
+
+
+        :return: The Celery task
+        """
+        return get_corporations_corporation_id()
 
     @property
     def get_corporations_corporation_id_icons(

@@ -6,6 +6,7 @@ You should not directly modify this module but instead modify the template 'code
 """
 
 from .get_dogma_attributes import get_dogma_attributes
+from .get_dogma_attributes_attribute_id import get_dogma_attributes_attribute_id
 from .get_dogma_effects import get_dogma_effects
 
 
@@ -31,6 +32,22 @@ class TaskDirectory(object):
         :return: The Celery task
         """
         return get_dogma_attributes()
+
+    @property
+    def get_dogma_attributes_attribute_id(self) -> get_dogma_attributes_attribute_id:
+        """
+        Get attribute information
+
+
+        Reference the docstrings for :func:`~EVECelery.tasks.ESI.Dogma.get_dogma_attributes_attribute_id.get_dogma_attributes_attribute_id.get_sync`,
+        :func:`~EVECelery.tasks.ESI.Dogma.get_dogma_attributes_attribute_id.get_dogma_attributes_attribute_id.run`, and
+        :class:`~EVECelery.tasks.ESI.Dogma.get_dogma_attributes_attribute_id.get_dogma_attributes_attribute_id`
+        for usage of this task, the required parameters, and additional information.
+
+
+        :return: The Celery task
+        """
+        return get_dogma_attributes_attribute_id()
 
     @property
     def get_dogma_effects(self) -> get_dogma_effects:

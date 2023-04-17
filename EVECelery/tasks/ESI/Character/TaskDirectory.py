@@ -5,6 +5,7 @@ This module was automatically generated from Jinja templates with the codegen to
 You should not directly modify this module but instead modify the template 'codegen/Templates/TaskDirectory.py'.
 """
 
+from .get_characters_character_id import get_characters_character_id
 from .get_characters_character_id_fatigue import get_characters_character_id_fatigue
 from .get_characters_character_id_portrait import get_characters_character_id_portrait
 from .get_characters_character_id_roles import get_characters_character_id_roles
@@ -16,6 +17,22 @@ class TaskDirectory(object):
 
     This task directory contains all tasks as attributes that are categorized with 'Character'.
     """
+
+    @property
+    def get_characters_character_id(self) -> get_characters_character_id:
+        """
+        Get character's public information
+
+
+        Reference the docstrings for :func:`~EVECelery.tasks.ESI.Character.get_characters_character_id.get_characters_character_id.get_sync`,
+        :func:`~EVECelery.tasks.ESI.Character.get_characters_character_id.get_characters_character_id.run`, and
+        :class:`~EVECelery.tasks.ESI.Character.get_characters_character_id.get_characters_character_id`
+        for usage of this task, the required parameters, and additional information.
+
+
+        :return: The Celery task
+        """
+        return get_characters_character_id()
 
     @property
     def get_characters_character_id_fatigue(

@@ -28,7 +28,9 @@ def extract_type(d: dict):
     if swagger_type == 'array':
         return f'{swagger_type}[{extract_type(d.get("items"))}]'
     elif swagger_type == 'object':
-        raise TypeError('not implemented yet')
+        raise TypeError('Extracting object type is not implemented yet')
+    elif swagger_type == 'number':
+        return d.get('format')
     else:
         return swagger_type
 
@@ -91,6 +93,8 @@ class ModelProperty(BaseModel):
             'integer': 'int',
             'string': 'str',
             'boolean': 'bool',
+            'float': 'float',
+            'double': 'float',
             'array[integer]': 'list[int]',
             'array[array[integer]]': 'list[list[int]]',
             'array[string]': 'list[str]'

@@ -14,6 +14,7 @@ from .get_universe_groups import get_universe_groups
 from .get_universe_groups_group_id import get_universe_groups_group_id
 from .get_universe_regions import get_universe_regions
 from .get_universe_regions_region_id import get_universe_regions_region_id
+from .get_universe_stars_star_id import get_universe_stars_star_id
 from .get_universe_structures import get_universe_structures
 from .get_universe_systems import get_universe_systems
 from .get_universe_types import get_universe_types
@@ -171,6 +172,22 @@ class TaskDirectory(object):
         :return: The Celery task
         """
         return get_universe_regions_region_id()
+
+    @property
+    def get_universe_stars_star_id(self) -> get_universe_stars_star_id:
+        """
+        Get star information
+
+
+        Reference the docstrings for :func:`~EVECelery.tasks.ESI.Universe.get_universe_stars_star_id.get_universe_stars_star_id.get_sync`,
+        :func:`~EVECelery.tasks.ESI.Universe.get_universe_stars_star_id.get_universe_stars_star_id.run`, and
+        :class:`~EVECelery.tasks.ESI.Universe.get_universe_stars_star_id.get_universe_stars_star_id`
+        for usage of this task, the required parameters, and additional information.
+
+
+        :return: The Celery task
+        """
+        return get_universe_stars_star_id()
 
     @property
     def get_universe_structures(self) -> get_universe_structures:
