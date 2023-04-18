@@ -6,9 +6,10 @@ import warnings
 import black
 import requests
 
+
 class GenerateAPI:
-    def __init__(self):
-        self.esi_schema = self.get_swagger_spec()
+    def __init__(self, local_file: bool = False):
+        self.esi_schema = self.download_swagger_spec() if not local_file else self.local_swagger_spec()
         self.template_env = Environment(loader=FileSystemLoader("codegen/Templates"),
                                         autoescape=select_autoescape(),
                                         undefined=StrictUndefined)
@@ -18,19 +19,20 @@ class GenerateAPI:
         self.total_templates_fail = 0
 
     @classmethod
-    def get_swagger_spec(cls, url: str = 'https://esi.evetech.net/latest/swagger.json') -> dict:
-        try:
-            r = requests.get(url, verify=True, timeout=60)
-            r.raise_for_status()
-            if r.status_code == 200:
-                return r.json()
-            else:
-                raise Exception(f'Unexpected response code {r.status_code} when downloading ESI Swagger spec.')
-        except Exception as ex:
-            print(ex)
-            warnings.warn('Error when downloading ESI Swagger spac. Falling back to loading local swagger.json if it exists.')
-            with open('swagger.json', 'r') as f:
-                return json.load(f)
+    def download_swagger_spec(cls, url: str = 'https://esi.evetech.net/latest/swagger.json') -> dict:
+        print(f'Downloading latest swagger spec from {url}')
+        r = requests.get(url, verify=True, timeout=60)
+        r.raise_for_status()
+        if r.status_code == 200:
+            return r.json()
+        else:
+            raise Exception(f'Unexpected response code {r.status_code} when downloading ESI Swagger spec.')
+
+    @classmethod
+    def local_swagger_spec(cls):
+        print(f'Loading local swagger spec from "swagger.json"')
+        with open('swagger.json', 'r') as f:
+            return json.load(f)
 
     def generate_template_models(self):
         for path_str, path in self.esi_schema['paths'].items():
@@ -116,8 +118,8 @@ class GenerateAPI:
               f'Total templates that failed to render / skipped: {self.total_templates_fail}')
 
     @classmethod
-    def run(cls):
-        g = cls()
+    def run(cls, local_file: bool):
+        g = cls(local_file)
         g.generate_template_models()
         g.render_templates()
         g.render_task_directory_templates()
