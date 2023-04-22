@@ -4,7 +4,8 @@ import requests
 from datetime import datetime
 from dateutil.parser import parse as dtparse
 from typing import Union
-from .TaskCached import TaskCached, ModelCachedSuccess, ModelCachedException
+from .TaskCached import TaskCached
+from .Models.ModelsCached import ModelCacheInfo, ModelCachedSuccess, ModelCachedException
 from requests.exceptions import RequestException
 from redis.exceptions import RedisError
 
@@ -112,9 +113,9 @@ class TaskESI(TaskCached):
                 response_model = self.reflection_get_model(f'Success{resp.status_code}_{self.__name__}')
                 response_data = resp.json()
                 if isinstance(response_data, dict):
-                    return response_model(cache_ttl=ttl_expire, headers=resp.headers, **response_data)
+                    return response_model(cache=ModelCacheInfo(ttl=ttl_expire), headers=resp.headers, body=response_data)
                 else:  # list response
-                    return response_model(cache_ttl=ttl_expire, headers=resp.headers, items=response_data)
+                    return response_model(cache=ModelCacheInfo(ttl=ttl_expire), headers=resp.headers, body=response_data)
             elif 400 <= resp.status_code < 500:
                 ESIErrorLimiter.update_limit(self.redis_cache,
                                              error_limit_remain=int(rheaders["x-esi-error-limit-remain"]),
@@ -122,7 +123,7 @@ class TaskESI(TaskCached):
                                              time=dtparse(rheaders["date"], ignoretz=True)
                                              )
                 msg = f'{resp.status_code} - {resp.json()}'
-                return ModelCachedException(exception_message=msg)
+                return ModelCachedException(message=msg)
             else:
                 resp.raise_for_status()
                 raise ValueError(f'Unhandled response code {resp.status_code}')

@@ -1,39 +1,10 @@
-from typing import Union, Tuple, Optional
+from typing import Union, Optional
 import hashlib
-from .TaskBase import TaskBase, ModelTaskBaseResponse
+from .Models.ModelsCached import ModelCachedResponse, ModelCachedException
+from .TaskBase import TaskBase
 from EVECelery.clients.ClientRedis import ClientRedisLocks, ClientRedisCache
 from EVECelery.exceptions.tasks import CachedException
 import redis
-from pydantic import Field
-
-
-class ModelCachedResponse(ModelTaskBaseResponse):
-    """
-    A cache response pydantic model for validation.
-
-
-    """
-    cache_hit: bool = Field(default=False, description='True if the request was returned from cache.')
-    cache_key: str = Field(default=None, description='The cache key as it exists in Redis.')
-    cache_ttl: int = Field(default=None,
-                           description='The current cache TTL for a previously cached response or the TTL to set on a result to cache.')
-
-
-class ModelCachedSuccess(ModelCachedResponse):
-    """
-
-    """
-    pass
-
-
-class ModelCachedException(ModelCachedResponse):
-    """
-    An exception occurred that should be cached to avoid exhausting error limits.
-
-
-    """
-    exception_message: str = Field(default='No exception info provided',
-                                   description='The message for a cached exception.')
 
 
 class TaskCached(TaskBase):
@@ -122,22 +93,22 @@ class TaskCached(TaskBase):
             key_cache = self.get_redis_cache_key(**kwargs)
             cached_data: str = self.redis_cache.get(key_cache)
             if cached_data:
-                response_pydantic = self.to_pydantic(cached_data)
-                response_pydantic.cache_ttl = self.redis_cache.ttl(key_cache)  # need to return current ttl, not initial
-                response_pydantic.cache_hit = True
+                response_pydantic: ModelCachedResponse = self.to_pydantic(cached_data)
+                response_pydantic.cache.ttl = self.redis_cache.ttl(key_cache)  # need to return current ttl, not initial
+                response_pydantic.cache.hit = True
             else:
                 response_pydantic = self._run_get_result(**kwargs)
-                response_pydantic.cache_hit = False
-                response_pydantic.cache_key = key_cache
-                if response_pydantic.cache_ttl is None:
-                    response_pydantic.cache_ttl = self.default_ttl()
+                response_pydantic.cache.hit = False
+                response_pydantic.cache.key = key_cache
+                if response_pydantic.cache.ttl is None:
+                    response_pydantic.cache.ttl = self.default_ttl()
 
-                self.redis_cache.set(name=response_pydantic.cache_key, value=response_pydantic.json(),
-                                     ex=response_pydantic.cache_ttl)
+                self.redis_cache.set(name=response_pydantic.cache.key, value=response_pydantic.json(),
+                                     ex=response_pydantic.cache.ttl)
 
         if isinstance(response_pydantic, ModelCachedException):
             raise CachedException(
-                f'{response_pydantic.exception_message} - Cached exception expires in {response_pydantic.cache_ttl} seconds')
+                f'{response_pydantic.message} - Cached exception expires in {response_pydantic.cache.ttl} seconds')
         else:
             return response_pydantic.dict()
 

@@ -1,31 +1,10 @@
 from celery import Task
-from typing import Optional, Union
-from pydantic import BaseModel, validate_arguments, Field, validator
+from typing import Optional, Union, Type
+from pydantic import BaseModel, validate_arguments
 import json
 import sys
 import inspect
-
-
-class ModelTaskBaseResponse(BaseModel):
-    """
-    A base response model to be serialized and deserialized by EVECelery tasks.
-
-
-    """
-    pydantic_model: str = Field(default=None,
-                                description='The name of the pydantic model class that this model was initialized with.')
-
-    class Config:
-        validate_assignment = True
-        allow_population_by_field_name = True
-
-    @validator('pydantic_model', pre=True, always=True)
-    def dynamic_set_pydantic_model(cls, v):
-        return v or cls.class_name()
-
-    @classmethod
-    def class_name(cls) -> str:
-        return cls.__name__
+from .Models.ModelsBase import ModelBaseWithModelInfo
 
 
 class TaskBase(Task):
@@ -74,7 +53,7 @@ class TaskBase(Task):
 
     @classmethod
     @validate_arguments
-    def to_pydantic(cls, json_data: Union[str, dict]) -> ModelTaskBaseResponse:
+    def to_pydantic(cls, json_data: Union[str, dict]) -> Type[ModelBaseWithModelInfo]:
         """
         Deserialize a JSON serialized string to a pydantic model.
 
@@ -98,8 +77,8 @@ class TaskBase(Task):
         else:
             deserialized_data: dict = json_data
         model = cls.reflection_get_model(deserialized_data.get('pydantic_model'))
-        if not issubclass(model, ModelTaskBaseResponse):
-            raise TypeError('Lookup model must inherit from ModelCachedResponse.')
+        if not issubclass(model, ModelBaseWithModelInfo):
+            raise TypeError('Lookup model must inherit from ModelBaseWithModelInfo.')
         return model(**deserialized_data)
 
     @validate_arguments
