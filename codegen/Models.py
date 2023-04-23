@@ -169,6 +169,9 @@ class ModelResponse(BaseModel):
             # remove imports and annotations
             body_module = re.sub(r'^\s*#.*', '', body_module, flags=re.MULTILINE)
             body_module = re.sub(r'^from __future__ import annotations.*', '', body_module, flags=re.MULTILINE)
+            if not any([l for l in body_module.splitlines() if 'Field' in l and 'pydantic' in l]):
+                body_module = f'from pydantic import Field\n{body_module}'
+
             body_module = body_module.strip()
 
             # extract last class name from source file
