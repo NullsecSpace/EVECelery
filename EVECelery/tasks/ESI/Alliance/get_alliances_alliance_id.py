@@ -5,70 +5,11 @@ This module was automatically generated from Jinja templates with the codegen to
 You should not directly modify this module but instead modify the template 'codegen/Templates/ESI_Task.py'.
 """
 
-from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
-from EVECelery.tasks.BaseTasks.TaskBase import ModelTaskBaseResponse
-from EVECelery.tasks.BaseTasks.TaskCached import (
-    ModelCachedSuccess,
-    ModelCachedException,
-)
-from pydantic import BaseModel, Field, validate_arguments
 from typing import Union, Optional
+from pydantic import validate_arguments
+from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
 
-
-class SuccessHeaders200_get_alliances_alliance_id(ModelTaskBaseResponse):
-    """
-    Headers for response code 200
-    """
-
-    Cache_Control: str | None = Field(
-        description="The caching mechanism used", alias="Cache-Control"
-    )
-    ETag: str | None = Field(description="RFC7232 compliant entity tag")
-    Expires: str | None = Field(description="RFC7231 formatted datetime string")
-    Last_Modified: str | None = Field(
-        description="RFC7231 formatted datetime string", alias="Last-Modified"
-    )
-
-
-class Success200_get_alliances_alliance_id(ModelCachedSuccess):
-    """
-    Public data about an alliance
-
-    Response for response code 200. This is the response body model that also contains the headers.
-
-    Example responses from ESI:
-
-    .. code-block:: json
-
-        {
-          "creator_corporation_id": 45678,
-          "creator_id": 12345,
-          "date_founded": "2016-06-26T21:00:00Z",
-          "executor_corporation_id": 98356193,
-          "name": "C C P Alliance",
-          "ticker": "<C C P>"
-        }
-
-    """
-
-    headers: SuccessHeaders200_get_alliances_alliance_id = Field(
-        ..., description='The response headers for this request.'
-    )
-    creator_corporation_id: int = Field(
-        default=..., description="ID of the corporation that created the alliance"
-    )
-    creator_id: int = Field(
-        default=..., description="ID of the character that created the alliance"
-    )
-    date_founded: str = Field(default=..., description="date_founded string")
-    executor_corporation_id: int | None = Field(
-        description="the executor corporation ID, if this alliance is not closed"
-    )
-    faction_id: int | None = Field(
-        description="Faction ID this alliance is fighting for, if this alliance is enlisted in factional warfare"
-    )
-    name: str = Field(default=..., description="the full name of the alliance")
-    ticker: str = Field(default=..., description="the short name of the alliance")
+from .Models.get_alliances_alliance_id_200 import Response200_get_alliances_alliance_id
 
 
 class get_alliances_alliance_id(TaskESI):
@@ -111,7 +52,7 @@ class get_alliances_alliance_id(TaskESI):
         datasource: str = "tranquility",
         kwargs_apply_async: Optional[dict] = None,
         kwargs_get: Optional[dict] = None,
-    ) -> Union[Success200_get_alliances_alliance_id]:
+    ) -> Union[Response200_get_alliances_alliance_id]:
         """
         Get alliance information
 
@@ -140,7 +81,7 @@ class get_alliances_alliance_id(TaskESI):
         :param datasource: The server name you would like data from -- ['tranquility']
         :param Optional[dict] kwargs_apply_async: Dictionary of keyword arguments passed to `task.apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_
         :param Optional[dict] kwargs_get: Dictionary of keyword arguments passed to `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_
-        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Success200_get_alliances_alliance_id`.
+        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Response200_get_alliances_alliance_id`.
         """
         return super().get_sync(
             alliance_id=alliance_id,
@@ -180,6 +121,6 @@ class get_alliances_alliance_id(TaskESI):
         :param alliance_id: An EVE alliance ID
         :param datasource: The server name you would like data from -- ['tranquility']
 
-        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Success200_get_alliances_alliance_id`.
+        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Response200_get_alliances_alliance_id`.
         """
         return super().run(alliance_id=alliance_id, datasource=datasource, **kwargs)

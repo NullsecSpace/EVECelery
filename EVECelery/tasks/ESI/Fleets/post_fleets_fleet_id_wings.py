@@ -5,46 +5,13 @@ This module was automatically generated from Jinja templates with the codegen to
 You should not directly modify this module but instead modify the template 'codegen/Templates/ESI_Task.py'.
 """
 
-from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
-from EVECelery.tasks.BaseTasks.TaskBase import ModelTaskBaseResponse
-from EVECelery.tasks.BaseTasks.TaskCached import (
-    ModelCachedSuccess,
-    ModelCachedException,
-)
-from pydantic import BaseModel, Field, validate_arguments
 from typing import Union, Optional
+from pydantic import validate_arguments
+from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
 
-
-class SuccessHeaders201_post_fleets_fleet_id_wings(ModelTaskBaseResponse):
-    """
-    Headers for response code 201
-    """
-
-    pass
-
-
-class Success201_post_fleets_fleet_id_wings(ModelCachedSuccess):
-    """
-    Wing created
-
-    Response for response code 201. This is the response body model that also contains the headers.
-
-    Example responses from ESI:
-
-    .. code-block:: json
-
-        {
-          "wing_id": 123
-        }
-
-    """
-
-    headers: SuccessHeaders201_post_fleets_fleet_id_wings = Field(
-        ..., description='The response headers for this request.'
-    )
-    wing_id: int = Field(
-        default=..., description="The wing_id of the newly created wing"
-    )
+from .Models.post_fleets_fleet_id_wings_201 import (
+    Response201_post_fleets_fleet_id_wings,
+)
 
 
 class post_fleets_fleet_id_wings(TaskESI):
@@ -88,7 +55,7 @@ class post_fleets_fleet_id_wings(TaskESI):
         token: str | None = None,
         kwargs_apply_async: Optional[dict] = None,
         kwargs_get: Optional[dict] = None,
-    ) -> Union[Success201_post_fleets_fleet_id_wings]:
+    ) -> Union[Response201_post_fleets_fleet_id_wings]:
         """
         Create fleet wing
 
@@ -114,7 +81,7 @@ class post_fleets_fleet_id_wings(TaskESI):
         :param token: Access token to use if unable to set a header
         :param Optional[dict] kwargs_apply_async: Dictionary of keyword arguments passed to `task.apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_
         :param Optional[dict] kwargs_get: Dictionary of keyword arguments passed to `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_
-        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Success201_post_fleets_fleet_id_wings`.
+        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Response201_post_fleets_fleet_id_wings`.
         """
         return super().get_sync(
             fleet_id=fleet_id,
@@ -158,7 +125,7 @@ class post_fleets_fleet_id_wings(TaskESI):
         :param datasource: The server name you would like data from -- ['tranquility']
         :param token: Access token to use if unable to set a header
 
-        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Success201_post_fleets_fleet_id_wings`.
+        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Response201_post_fleets_fleet_id_wings`.
         """
         return super().run(
             fleet_id=fleet_id, datasource=datasource, token=token, **kwargs

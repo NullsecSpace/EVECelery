@@ -5,57 +5,13 @@ This module was automatically generated from Jinja templates with the codegen to
 You should not directly modify this module but instead modify the template 'codegen/Templates/ESI_Task.py'.
 """
 
-from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
-from EVECelery.tasks.BaseTasks.TaskBase import ModelTaskBaseResponse
-from EVECelery.tasks.BaseTasks.TaskCached import (
-    ModelCachedSuccess,
-    ModelCachedException,
-)
-from pydantic import BaseModel, Field, validate_arguments
 from typing import Union, Optional
+from pydantic import validate_arguments
+from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
 
-
-class SuccessHeaders200_get_characters_character_id_fatigue(ModelTaskBaseResponse):
-    """
-    Headers for response code 200
-    """
-
-    Cache_Control: str | None = Field(
-        description="The caching mechanism used", alias="Cache-Control"
-    )
-    ETag: str | None = Field(description="RFC7232 compliant entity tag")
-    Expires: str | None = Field(description="RFC7231 formatted datetime string")
-    Last_Modified: str | None = Field(
-        description="RFC7231 formatted datetime string", alias="Last-Modified"
-    )
-
-
-class Success200_get_characters_character_id_fatigue(ModelCachedSuccess):
-    """
-    Jump activation and fatigue information
-
-    Response for response code 200. This is the response body model that also contains the headers.
-
-    Example responses from ESI:
-
-    .. code-block:: json
-
-        {
-          "jump_fatigue_expire_date": "2017-07-06T15:47:00Z",
-          "last_jump_date": "2017-07-05T15:47:00Z",
-          "last_update_date": "2017-07-05T15:42:00Z"
-        }
-
-    """
-
-    headers: SuccessHeaders200_get_characters_character_id_fatigue = Field(
-        ..., description='The response headers for this request.'
-    )
-    jump_fatigue_expire_date: str | None = Field(
-        description="Character's jump fatigue expiry"
-    )
-    last_jump_date: str | None = Field(description="Character's last jump activation")
-    last_update_date: str | None = Field(description="Character's last jump update")
+from .Models.get_characters_character_id_fatigue_200 import (
+    Response200_get_characters_character_id_fatigue,
+)
 
 
 class get_characters_character_id_fatigue(TaskESI):
@@ -99,7 +55,7 @@ class get_characters_character_id_fatigue(TaskESI):
         token: str | None = None,
         kwargs_apply_async: Optional[dict] = None,
         kwargs_get: Optional[dict] = None,
-    ) -> Union[Success200_get_characters_character_id_fatigue]:
+    ) -> Union[Response200_get_characters_character_id_fatigue]:
         """
         Get jump fatigue
 
@@ -125,7 +81,7 @@ class get_characters_character_id_fatigue(TaskESI):
         :param token: Access token to use if unable to set a header
         :param Optional[dict] kwargs_apply_async: Dictionary of keyword arguments passed to `task.apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_
         :param Optional[dict] kwargs_get: Dictionary of keyword arguments passed to `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_
-        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Success200_get_characters_character_id_fatigue`.
+        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Response200_get_characters_character_id_fatigue`.
         """
         return super().get_sync(
             character_id=character_id,
@@ -169,7 +125,7 @@ class get_characters_character_id_fatigue(TaskESI):
         :param datasource: The server name you would like data from -- ['tranquility']
         :param token: Access token to use if unable to set a header
 
-        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Success200_get_characters_character_id_fatigue`.
+        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Response200_get_characters_character_id_fatigue`.
         """
         return super().run(
             character_id=character_id, datasource=datasource, token=token, **kwargs

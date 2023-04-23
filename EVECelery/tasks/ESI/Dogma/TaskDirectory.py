@@ -7,7 +7,11 @@ You should not directly modify this module but instead modify the template 'code
 
 from .get_dogma_attributes import get_dogma_attributes
 from .get_dogma_attributes_attribute_id import get_dogma_attributes_attribute_id
+from .get_dogma_dynamic_items_type_id_item_id import (
+    get_dogma_dynamic_items_type_id_item_id,
+)
 from .get_dogma_effects import get_dogma_effects
+from .get_dogma_effects_effect_id import get_dogma_effects_effect_id
 
 
 class TaskDirectory(object):
@@ -50,6 +54,24 @@ class TaskDirectory(object):
         return get_dogma_attributes_attribute_id()
 
     @property
+    def get_dogma_dynamic_items_type_id_item_id(
+        self,
+    ) -> get_dogma_dynamic_items_type_id_item_id:
+        """
+        Get dynamic item information
+
+
+        Reference the docstrings for :func:`~EVECelery.tasks.ESI.Dogma.get_dogma_dynamic_items_type_id_item_id.get_dogma_dynamic_items_type_id_item_id.get_sync`,
+        :func:`~EVECelery.tasks.ESI.Dogma.get_dogma_dynamic_items_type_id_item_id.get_dogma_dynamic_items_type_id_item_id.run`, and
+        :class:`~EVECelery.tasks.ESI.Dogma.get_dogma_dynamic_items_type_id_item_id.get_dogma_dynamic_items_type_id_item_id`
+        for usage of this task, the required parameters, and additional information.
+
+
+        :return: The Celery task
+        """
+        return get_dogma_dynamic_items_type_id_item_id()
+
+    @property
     def get_dogma_effects(self) -> get_dogma_effects:
         """
         Get effects
@@ -64,3 +86,19 @@ class TaskDirectory(object):
         :return: The Celery task
         """
         return get_dogma_effects()
+
+    @property
+    def get_dogma_effects_effect_id(self) -> get_dogma_effects_effect_id:
+        """
+        Get effect information
+
+
+        Reference the docstrings for :func:`~EVECelery.tasks.ESI.Dogma.get_dogma_effects_effect_id.get_dogma_effects_effect_id.get_sync`,
+        :func:`~EVECelery.tasks.ESI.Dogma.get_dogma_effects_effect_id.get_dogma_effects_effect_id.run`, and
+        :class:`~EVECelery.tasks.ESI.Dogma.get_dogma_effects_effect_id.get_dogma_effects_effect_id`
+        for usage of this task, the required parameters, and additional information.
+
+
+        :return: The Celery task
+        """
+        return get_dogma_effects_effect_id()

@@ -5,59 +5,13 @@ This module was automatically generated from Jinja templates with the codegen to
 You should not directly modify this module but instead modify the template 'codegen/Templates/ESI_Task.py'.
 """
 
-from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
-from EVECelery.tasks.BaseTasks.TaskBase import ModelTaskBaseResponse
-from EVECelery.tasks.BaseTasks.TaskCached import (
-    ModelCachedSuccess,
-    ModelCachedException,
-)
-from pydantic import BaseModel, Field, validate_arguments
 from typing import Union, Optional
+from pydantic import validate_arguments
+from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
 
-
-class SuccessHeaders200_get_universe_graphics_graphic_id(ModelTaskBaseResponse):
-    """
-    Headers for response code 200
-    """
-
-    Cache_Control: str | None = Field(
-        description="The caching mechanism used", alias="Cache-Control"
-    )
-    ETag: str | None = Field(description="RFC7232 compliant entity tag")
-    Expires: str | None = Field(description="RFC7231 formatted datetime string")
-    Last_Modified: str | None = Field(
-        description="RFC7231 formatted datetime string", alias="Last-Modified"
-    )
-
-
-class Success200_get_universe_graphics_graphic_id(ModelCachedSuccess):
-    """
-    Information about a graphic
-
-    Response for response code 200. This is the response body model that also contains the headers.
-
-    Example responses from ESI:
-
-    .. code-block:: json
-
-        {
-          "graphic_file": "res:/dx9/model/worldobject/planet/moon.red",
-          "graphic_id": 10
-        }
-
-    """
-
-    headers: SuccessHeaders200_get_universe_graphics_graphic_id = Field(
-        ..., description='The response headers for this request.'
-    )
-    collision_file: str | None = Field(description="collision_file string")
-    graphic_file: str | None = Field(description="graphic_file string")
-    graphic_id: int = Field(default=..., description="graphic_id integer")
-    icon_folder: str | None = Field(description="icon_folder string")
-    sof_dna: str | None = Field(description="sof_dna string")
-    sof_fation_name: str | None = Field(description="sof_fation_name string")
-    sof_hull_name: str | None = Field(description="sof_hull_name string")
-    sof_race_name: str | None = Field(description="sof_race_name string")
+from .Models.get_universe_graphics_graphic_id_200 import (
+    Response200_get_universe_graphics_graphic_id,
+)
 
 
 class get_universe_graphics_graphic_id(TaskESI):
@@ -100,7 +54,7 @@ class get_universe_graphics_graphic_id(TaskESI):
         datasource: str = "tranquility",
         kwargs_apply_async: Optional[dict] = None,
         kwargs_get: Optional[dict] = None,
-    ) -> Union[Success200_get_universe_graphics_graphic_id]:
+    ) -> Union[Response200_get_universe_graphics_graphic_id]:
         """
         Get graphic information
 
@@ -127,7 +81,7 @@ class get_universe_graphics_graphic_id(TaskESI):
         :param datasource: The server name you would like data from -- ['tranquility']
         :param Optional[dict] kwargs_apply_async: Dictionary of keyword arguments passed to `task.apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_
         :param Optional[dict] kwargs_get: Dictionary of keyword arguments passed to `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_
-        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Success200_get_universe_graphics_graphic_id`.
+        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Response200_get_universe_graphics_graphic_id`.
         """
         return super().get_sync(
             graphic_id=graphic_id,
@@ -165,6 +119,6 @@ class get_universe_graphics_graphic_id(TaskESI):
         :param graphic_id: graphic_id integer
         :param datasource: The server name you would like data from -- ['tranquility']
 
-        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Success200_get_universe_graphics_graphic_id`.
+        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Response200_get_universe_graphics_graphic_id`.
         """
         return super().run(graphic_id=graphic_id, datasource=datasource, **kwargs)

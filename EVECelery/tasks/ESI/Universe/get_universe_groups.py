@@ -5,54 +5,11 @@ This module was automatically generated from Jinja templates with the codegen to
 You should not directly modify this module but instead modify the template 'codegen/Templates/ESI_Task.py'.
 """
 
-from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
-from EVECelery.tasks.BaseTasks.TaskBase import ModelTaskBaseResponse
-from EVECelery.tasks.BaseTasks.TaskCached import (
-    ModelCachedSuccess,
-    ModelCachedException,
-)
-from pydantic import BaseModel, Field, validate_arguments
 from typing import Union, Optional
+from pydantic import validate_arguments
+from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
 
-
-class SuccessHeaders200_get_universe_groups(ModelTaskBaseResponse):
-    """
-    Headers for response code 200
-    """
-
-    Cache_Control: str | None = Field(
-        description="The caching mechanism used", alias="Cache-Control"
-    )
-    ETag: str | None = Field(description="RFC7232 compliant entity tag")
-    Expires: str | None = Field(description="RFC7231 formatted datetime string")
-    Last_Modified: str | None = Field(
-        description="RFC7231 formatted datetime string", alias="Last-Modified"
-    )
-    X_Pages: int | None = Field(description="Maximum page number", alias="X-Pages")
-
-
-class Success200_get_universe_groups(ModelCachedSuccess):
-    """
-    A list of item group ids
-
-    Response for response code 200. This is the response body model that also contains the headers.
-
-    Example responses from ESI:
-
-    .. code-block:: json
-
-        [
-          1,
-          2,
-          3
-        ]
-
-    """
-
-    headers: SuccessHeaders200_get_universe_groups = Field(
-        ..., description='The response headers for this request.'
-    )
-    items: list[int] | None = Field(description="A list of item group ids")
+from .Models.get_universe_groups_200 import Response200_get_universe_groups
 
 
 class get_universe_groups(TaskESI):
@@ -94,7 +51,7 @@ class get_universe_groups(TaskESI):
         page: int = 1,
         kwargs_apply_async: Optional[dict] = None,
         kwargs_get: Optional[dict] = None,
-    ) -> Union[Success200_get_universe_groups]:
+    ) -> Union[Response200_get_universe_groups]:
         """
         Get item groups
 
@@ -119,7 +76,7 @@ class get_universe_groups(TaskESI):
         :param page: Which page of results to return
         :param Optional[dict] kwargs_apply_async: Dictionary of keyword arguments passed to `task.apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_
         :param Optional[dict] kwargs_get: Dictionary of keyword arguments passed to `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_
-        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Success200_get_universe_groups`.
+        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Response200_get_universe_groups`.
         """
         return super().get_sync(
             datasource=datasource,
@@ -155,6 +112,6 @@ class get_universe_groups(TaskESI):
         :param datasource: The server name you would like data from -- ['tranquility']
         :param page: Which page of results to return
 
-        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Success200_get_universe_groups`.
+        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Response200_get_universe_groups`.
         """
         return super().run(datasource=datasource, page=page, **kwargs)

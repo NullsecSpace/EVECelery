@@ -7,24 +7,38 @@ You should not directly modify this module but instead modify the template 'code
 """
 
 from .Alliance.TaskDirectory import TaskDirectory as AllianceTaskDirectory
-from .Character.TaskDirectory import TaskDirectory as CharacterTaskDirectory
-from .Skills.TaskDirectory import TaskDirectory as SkillsTaskDirectory
-from .Calendar.TaskDirectory import TaskDirectory as CalendarTaskDirectory
 from .Contacts.TaskDirectory import TaskDirectory as ContactsTaskDirectory
-from .Fleets.TaskDirectory import TaskDirectory as FleetsTaskDirectory
+from .Character.TaskDirectory import TaskDirectory as CharacterTaskDirectory
+from .Assets.TaskDirectory import TaskDirectory as AssetsTaskDirectory
+from .Skills.TaskDirectory import TaskDirectory as SkillsTaskDirectory
+from .Bookmarks.TaskDirectory import TaskDirectory as BookmarksTaskDirectory
+from .Calendar.TaskDirectory import TaskDirectory as CalendarTaskDirectory
 from .Clones.TaskDirectory import TaskDirectory as ClonesTaskDirectory
+from .Contracts.TaskDirectory import TaskDirectory as ContractsTaskDirectory
+from .Fittings.TaskDirectory import TaskDirectory as FittingsTaskDirectory
+from .Fleets.TaskDirectory import TaskDirectory as FleetsTaskDirectory
+from .FactionWarfare.TaskDirectory import TaskDirectory as FactionWarfareTaskDirectory
+from .Industry.TaskDirectory import TaskDirectory as IndustryTaskDirectory
+from .Killmails.TaskDirectory import TaskDirectory as KillmailsTaskDirectory
 from .Location.TaskDirectory import TaskDirectory as LocationTaskDirectory
-from .Search.TaskDirectory import TaskDirectory as SearchTaskDirectory
-from .Corporation.TaskDirectory import TaskDirectory as CorporationTaskDirectory
-from .Dogma.TaskDirectory import TaskDirectory as DogmaTaskDirectory
-from .Market.TaskDirectory import TaskDirectory as MarketTaskDirectory
+from .Loyalty.TaskDirectory import TaskDirectory as LoyaltyTaskDirectory
+from .Mail.TaskDirectory import TaskDirectory as MailTaskDirectory
 from .Opportunities.TaskDirectory import TaskDirectory as OpportunitiesTaskDirectory
-from .Routes.TaskDirectory import TaskDirectory as RoutesTaskDirectory
-from .Status.TaskDirectory import TaskDirectory as StatusTaskDirectory
-from .Universe.TaskDirectory import TaskDirectory as UniverseTaskDirectory
+from .Market.TaskDirectory import TaskDirectory as MarketTaskDirectory
 from .PlanetaryInteraction.TaskDirectory import (
     TaskDirectory as PlanetaryInteractionTaskDirectory,
 )
+from .Search.TaskDirectory import TaskDirectory as SearchTaskDirectory
+from .Wallet.TaskDirectory import TaskDirectory as WalletTaskDirectory
+from .Corporation.TaskDirectory import TaskDirectory as CorporationTaskDirectory
+from .Dogma.TaskDirectory import TaskDirectory as DogmaTaskDirectory
+from .Incursions.TaskDirectory import TaskDirectory as IncursionsTaskDirectory
+from .Insurance.TaskDirectory import TaskDirectory as InsuranceTaskDirectory
+from .Routes.TaskDirectory import TaskDirectory as RoutesTaskDirectory
+from .Sovereignty.TaskDirectory import TaskDirectory as SovereigntyTaskDirectory
+from .Status.TaskDirectory import TaskDirectory as StatusTaskDirectory
+from .UserInterface.TaskDirectory import TaskDirectory as UserInterfaceTaskDirectory
+from .Universe.TaskDirectory import TaskDirectory as UniverseTaskDirectory
 from .Wars.TaskDirectory import TaskDirectory as WarsTaskDirectory
 
 
@@ -47,6 +61,17 @@ class TaskDirectory(object):
         return AllianceTaskDirectory()
 
     @property
+    def Contacts(self) -> ContactsTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Contacts"
+
+
+        :return: The task directory for all Contacts ESI tasks
+
+        """
+        return ContactsTaskDirectory()
+
+    @property
     def Character(self) -> CharacterTaskDirectory:
         """
         Subdirectory for ESI tasks categorized as "Character"
@@ -56,6 +81,17 @@ class TaskDirectory(object):
 
         """
         return CharacterTaskDirectory()
+
+    @property
+    def Assets(self) -> AssetsTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Assets"
+
+
+        :return: The task directory for all Assets ESI tasks
+
+        """
+        return AssetsTaskDirectory()
 
     @property
     def Skills(self) -> SkillsTaskDirectory:
@@ -69,6 +105,17 @@ class TaskDirectory(object):
         return SkillsTaskDirectory()
 
     @property
+    def Bookmarks(self) -> BookmarksTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Bookmarks"
+
+
+        :return: The task directory for all Bookmarks ESI tasks
+
+        """
+        return BookmarksTaskDirectory()
+
+    @property
     def Calendar(self) -> CalendarTaskDirectory:
         """
         Subdirectory for ESI tasks categorized as "Calendar"
@@ -78,28 +125,6 @@ class TaskDirectory(object):
 
         """
         return CalendarTaskDirectory()
-
-    @property
-    def Contacts(self) -> ContactsTaskDirectory:
-        """
-        Subdirectory for ESI tasks categorized as "Contacts"
-
-
-        :return: The task directory for all Contacts ESI tasks
-
-        """
-        return ContactsTaskDirectory()
-
-    @property
-    def Fleets(self) -> FleetsTaskDirectory:
-        """
-        Subdirectory for ESI tasks categorized as "Fleets"
-
-
-        :return: The task directory for all Fleets ESI tasks
-
-        """
-        return FleetsTaskDirectory()
 
     @property
     def Clones(self) -> ClonesTaskDirectory:
@@ -113,6 +138,72 @@ class TaskDirectory(object):
         return ClonesTaskDirectory()
 
     @property
+    def Contracts(self) -> ContractsTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Contracts"
+
+
+        :return: The task directory for all Contracts ESI tasks
+
+        """
+        return ContractsTaskDirectory()
+
+    @property
+    def Fittings(self) -> FittingsTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Fittings"
+
+
+        :return: The task directory for all Fittings ESI tasks
+
+        """
+        return FittingsTaskDirectory()
+
+    @property
+    def Fleets(self) -> FleetsTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Fleets"
+
+
+        :return: The task directory for all Fleets ESI tasks
+
+        """
+        return FleetsTaskDirectory()
+
+    @property
+    def FactionWarfare(self) -> FactionWarfareTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "FactionWarfare"
+
+
+        :return: The task directory for all FactionWarfare ESI tasks
+
+        """
+        return FactionWarfareTaskDirectory()
+
+    @property
+    def Industry(self) -> IndustryTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Industry"
+
+
+        :return: The task directory for all Industry ESI tasks
+
+        """
+        return IndustryTaskDirectory()
+
+    @property
+    def Killmails(self) -> KillmailsTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Killmails"
+
+
+        :return: The task directory for all Killmails ESI tasks
+
+        """
+        return KillmailsTaskDirectory()
+
+    @property
     def Location(self) -> LocationTaskDirectory:
         """
         Subdirectory for ESI tasks categorized as "Location"
@@ -124,6 +215,61 @@ class TaskDirectory(object):
         return LocationTaskDirectory()
 
     @property
+    def Loyalty(self) -> LoyaltyTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Loyalty"
+
+
+        :return: The task directory for all Loyalty ESI tasks
+
+        """
+        return LoyaltyTaskDirectory()
+
+    @property
+    def Mail(self) -> MailTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Mail"
+
+
+        :return: The task directory for all Mail ESI tasks
+
+        """
+        return MailTaskDirectory()
+
+    @property
+    def Opportunities(self) -> OpportunitiesTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Opportunities"
+
+
+        :return: The task directory for all Opportunities ESI tasks
+
+        """
+        return OpportunitiesTaskDirectory()
+
+    @property
+    def Market(self) -> MarketTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Market"
+
+
+        :return: The task directory for all Market ESI tasks
+
+        """
+        return MarketTaskDirectory()
+
+    @property
+    def PlanetaryInteraction(self) -> PlanetaryInteractionTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "PlanetaryInteraction"
+
+
+        :return: The task directory for all PlanetaryInteraction ESI tasks
+
+        """
+        return PlanetaryInteractionTaskDirectory()
+
+    @property
     def Search(self) -> SearchTaskDirectory:
         """
         Subdirectory for ESI tasks categorized as "Search"
@@ -133,6 +279,17 @@ class TaskDirectory(object):
 
         """
         return SearchTaskDirectory()
+
+    @property
+    def Wallet(self) -> WalletTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Wallet"
+
+
+        :return: The task directory for all Wallet ESI tasks
+
+        """
+        return WalletTaskDirectory()
 
     @property
     def Corporation(self) -> CorporationTaskDirectory:
@@ -157,26 +314,26 @@ class TaskDirectory(object):
         return DogmaTaskDirectory()
 
     @property
-    def Market(self) -> MarketTaskDirectory:
+    def Incursions(self) -> IncursionsTaskDirectory:
         """
-        Subdirectory for ESI tasks categorized as "Market"
+        Subdirectory for ESI tasks categorized as "Incursions"
 
 
-        :return: The task directory for all Market ESI tasks
+        :return: The task directory for all Incursions ESI tasks
 
         """
-        return MarketTaskDirectory()
+        return IncursionsTaskDirectory()
 
     @property
-    def Opportunities(self) -> OpportunitiesTaskDirectory:
+    def Insurance(self) -> InsuranceTaskDirectory:
         """
-        Subdirectory for ESI tasks categorized as "Opportunities"
+        Subdirectory for ESI tasks categorized as "Insurance"
 
 
-        :return: The task directory for all Opportunities ESI tasks
+        :return: The task directory for all Insurance ESI tasks
 
         """
-        return OpportunitiesTaskDirectory()
+        return InsuranceTaskDirectory()
 
     @property
     def Routes(self) -> RoutesTaskDirectory:
@@ -190,6 +347,17 @@ class TaskDirectory(object):
         return RoutesTaskDirectory()
 
     @property
+    def Sovereignty(self) -> SovereigntyTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "Sovereignty"
+
+
+        :return: The task directory for all Sovereignty ESI tasks
+
+        """
+        return SovereigntyTaskDirectory()
+
+    @property
     def Status(self) -> StatusTaskDirectory:
         """
         Subdirectory for ESI tasks categorized as "Status"
@@ -201,6 +369,17 @@ class TaskDirectory(object):
         return StatusTaskDirectory()
 
     @property
+    def UserInterface(self) -> UserInterfaceTaskDirectory:
+        """
+        Subdirectory for ESI tasks categorized as "UserInterface"
+
+
+        :return: The task directory for all UserInterface ESI tasks
+
+        """
+        return UserInterfaceTaskDirectory()
+
+    @property
     def Universe(self) -> UniverseTaskDirectory:
         """
         Subdirectory for ESI tasks categorized as "Universe"
@@ -210,17 +389,6 @@ class TaskDirectory(object):
 
         """
         return UniverseTaskDirectory()
-
-    @property
-    def PlanetaryInteraction(self) -> PlanetaryInteractionTaskDirectory:
-        """
-        Subdirectory for ESI tasks categorized as "PlanetaryInteraction"
-
-
-        :return: The task directory for all PlanetaryInteraction ESI tasks
-
-        """
-        return PlanetaryInteractionTaskDirectory()
 
     @property
     def Wars(self) -> WarsTaskDirectory:

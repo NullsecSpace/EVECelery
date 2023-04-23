@@ -5,56 +5,13 @@ This module was automatically generated from Jinja templates with the codegen to
 You should not directly modify this module but instead modify the template 'codegen/Templates/ESI_Task.py'.
 """
 
-from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
-from EVECelery.tasks.BaseTasks.TaskBase import ModelTaskBaseResponse
-from EVECelery.tasks.BaseTasks.TaskCached import (
-    ModelCachedSuccess,
-    ModelCachedException,
-)
-from pydantic import BaseModel, Field, validate_arguments
 from typing import Union, Optional
+from pydantic import validate_arguments
+from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
 
-
-class SuccessHeaders200_get_route_origin_destination(ModelTaskBaseResponse):
-    """
-    Headers for response code 200
-    """
-
-    Cache_Control: str | None = Field(
-        description="The caching mechanism used", alias="Cache-Control"
-    )
-    ETag: str | None = Field(description="RFC7232 compliant entity tag")
-    Expires: str | None = Field(description="RFC7231 formatted datetime string")
-    Last_Modified: str | None = Field(
-        description="RFC7231 formatted datetime string", alias="Last-Modified"
-    )
-
-
-class Success200_get_route_origin_destination(ModelCachedSuccess):
-    """
-    Solar systems in route from origin to destination
-
-    Response for response code 200. This is the response body model that also contains the headers.
-
-    Example responses from ESI:
-
-    .. code-block:: json
-
-        [
-          30002771,
-          30002770,
-          30002769,
-          30002772
-        ]
-
-    """
-
-    headers: SuccessHeaders200_get_route_origin_destination = Field(
-        ..., description='The response headers for this request.'
-    )
-    items: list[int] | None = Field(
-        description="Solar systems in route from origin to destination"
-    )
+from .Models.get_route_origin_destination_200 import (
+    Response200_get_route_origin_destination,
+)
 
 
 class get_route_origin_destination(TaskESI):
@@ -102,7 +59,7 @@ class get_route_origin_destination(TaskESI):
         flag: str = "shortest",
         kwargs_apply_async: Optional[dict] = None,
         kwargs_get: Optional[dict] = None,
-    ) -> Union[Success200_get_route_origin_destination]:
+    ) -> Union[Response200_get_route_origin_destination]:
         """
         Get route
 
@@ -133,7 +90,7 @@ class get_route_origin_destination(TaskESI):
         :param flag: route security preference -- ['shortest', 'secure', 'insecure']
         :param Optional[dict] kwargs_apply_async: Dictionary of keyword arguments passed to `task.apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_
         :param Optional[dict] kwargs_get: Dictionary of keyword arguments passed to `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_
-        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Success200_get_route_origin_destination`.
+        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Response200_get_route_origin_destination`.
         """
         return super().get_sync(
             destination=destination,
@@ -188,7 +145,7 @@ class get_route_origin_destination(TaskESI):
         :param datasource: The server name you would like data from -- ['tranquility']
         :param flag: route security preference -- ['shortest', 'secure', 'insecure']
 
-        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Success200_get_route_origin_destination`.
+        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Response200_get_route_origin_destination`.
         """
         return super().run(
             destination=destination,

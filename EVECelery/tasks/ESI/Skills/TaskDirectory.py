@@ -8,6 +8,10 @@ You should not directly modify this module but instead modify the template 'code
 from .get_characters_character_id_attributes import (
     get_characters_character_id_attributes,
 )
+from .get_characters_character_id_skillqueue import (
+    get_characters_character_id_skillqueue,
+)
+from .get_characters_character_id_skills import get_characters_character_id_skills
 
 
 class TaskDirectory(object):
@@ -34,3 +38,37 @@ class TaskDirectory(object):
         :return: The Celery task
         """
         return get_characters_character_id_attributes()
+
+    @property
+    def get_characters_character_id_skillqueue(
+        self,
+    ) -> get_characters_character_id_skillqueue:
+        """
+        Get character's skill queue
+
+
+        Reference the docstrings for :func:`~EVECelery.tasks.ESI.Skills.get_characters_character_id_skillqueue.get_characters_character_id_skillqueue.get_sync`,
+        :func:`~EVECelery.tasks.ESI.Skills.get_characters_character_id_skillqueue.get_characters_character_id_skillqueue.run`, and
+        :class:`~EVECelery.tasks.ESI.Skills.get_characters_character_id_skillqueue.get_characters_character_id_skillqueue`
+        for usage of this task, the required parameters, and additional information.
+
+
+        :return: The Celery task
+        """
+        return get_characters_character_id_skillqueue()
+
+    @property
+    def get_characters_character_id_skills(self) -> get_characters_character_id_skills:
+        """
+        Get character skills
+
+
+        Reference the docstrings for :func:`~EVECelery.tasks.ESI.Skills.get_characters_character_id_skills.get_characters_character_id_skills.get_sync`,
+        :func:`~EVECelery.tasks.ESI.Skills.get_characters_character_id_skills.get_characters_character_id_skills.run`, and
+        :class:`~EVECelery.tasks.ESI.Skills.get_characters_character_id_skills.get_characters_character_id_skills`
+        for usage of this task, the required parameters, and additional information.
+
+
+        :return: The Celery task
+        """
+        return get_characters_character_id_skills()

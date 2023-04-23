@@ -5,68 +5,13 @@ This module was automatically generated from Jinja templates with the codegen to
 You should not directly modify this module but instead modify the template 'codegen/Templates/ESI_Task.py'.
 """
 
-from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
-from EVECelery.tasks.BaseTasks.TaskBase import ModelTaskBaseResponse
-from EVECelery.tasks.BaseTasks.TaskCached import (
-    ModelCachedSuccess,
-    ModelCachedException,
-)
-from pydantic import BaseModel, Field, validate_arguments
 from typing import Union, Optional
+from pydantic import validate_arguments
+from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
 
-
-class SuccessHeaders200_get_dogma_attributes_attribute_id(ModelTaskBaseResponse):
-    """
-    Headers for response code 200
-    """
-
-    Cache_Control: str | None = Field(
-        description="The caching mechanism used", alias="Cache-Control"
-    )
-    ETag: str | None = Field(description="RFC7232 compliant entity tag")
-    Expires: str | None = Field(description="RFC7231 formatted datetime string")
-    Last_Modified: str | None = Field(
-        description="RFC7231 formatted datetime string", alias="Last-Modified"
-    )
-
-
-class Success200_get_dogma_attributes_attribute_id(ModelCachedSuccess):
-    """
-    Information about a dogma attribute
-
-    Response for response code 200. This is the response body model that also contains the headers.
-
-    Example responses from ESI:
-
-    .. code-block:: json
-
-        {
-          "attribute_id": 20,
-          "default_value": 1,
-          "description": "Factor by which topspeed increases.",
-          "display_name": "Maximum Velocity Bonus",
-          "high_is_good": true,
-          "icon_id": 1389,
-          "name": "speedFactor",
-          "published": true,
-          "unit_id": 124
-        }
-
-    """
-
-    headers: SuccessHeaders200_get_dogma_attributes_attribute_id = Field(
-        ..., description='The response headers for this request.'
-    )
-    attribute_id: int = Field(default=..., description="attribute_id integer")
-    default_value: float | None = Field(description="default_value number")
-    description: str | None = Field(description="description string")
-    display_name: str | None = Field(description="display_name string")
-    high_is_good: bool | None = Field(description="high_is_good boolean")
-    icon_id: int | None = Field(description="icon_id integer")
-    name: str | None = Field(description="name string")
-    published: bool | None = Field(description="published boolean")
-    stackable: bool | None = Field(description="stackable boolean")
-    unit_id: int | None = Field(description="unit_id integer")
+from .Models.get_dogma_attributes_attribute_id_200 import (
+    Response200_get_dogma_attributes_attribute_id,
+)
 
 
 class get_dogma_attributes_attribute_id(TaskESI):
@@ -109,7 +54,7 @@ class get_dogma_attributes_attribute_id(TaskESI):
         datasource: str = "tranquility",
         kwargs_apply_async: Optional[dict] = None,
         kwargs_get: Optional[dict] = None,
-    ) -> Union[Success200_get_dogma_attributes_attribute_id]:
+    ) -> Union[Response200_get_dogma_attributes_attribute_id]:
         """
         Get attribute information
 
@@ -136,7 +81,7 @@ class get_dogma_attributes_attribute_id(TaskESI):
         :param datasource: The server name you would like data from -- ['tranquility']
         :param Optional[dict] kwargs_apply_async: Dictionary of keyword arguments passed to `task.apply_async() <https://docs.celeryq.dev/en/stable/reference/celery.app.task.html?highlight=apply_async#celery.app.task.Task.apply_async>`_
         :param Optional[dict] kwargs_get: Dictionary of keyword arguments passed to `AsyncResult.get() <https://docs.celeryq.dev/en/stable/reference/celery.result.html#celery.result.AsyncResult.get>`_
-        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Success200_get_dogma_attributes_attribute_id`.
+        :return: The response from ESI as a pydantic object. The response model will follow the structure of :class:`Response200_get_dogma_attributes_attribute_id`.
         """
         return super().get_sync(
             attribute_id=attribute_id,
@@ -174,6 +119,6 @@ class get_dogma_attributes_attribute_id(TaskESI):
         :param attribute_id: A dogma attribute ID
         :param datasource: The server name you would like data from -- ['tranquility']
 
-        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Success200_get_dogma_attributes_attribute_id`.
+        :return: The response from ESI as a JSON dictionary. The response dictionary will follow the structure of :class:`Response200_get_dogma_attributes_attribute_id`.
         """
         return super().run(attribute_id=attribute_id, datasource=datasource, **kwargs)
