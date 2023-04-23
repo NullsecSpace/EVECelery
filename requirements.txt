@@ -12,3 +12,4 @@ flake8
 pytest-celery
 pytest~=7.2.0
 docker~=6.0.1
+datamodel-code-generator[http]~=0.18.0

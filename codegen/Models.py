@@ -2,6 +2,10 @@ from pydantic import BaseModel, validator, Field, conlist
 import warnings
 from typing import Literal
 import json
+from datamodel_code_generator import InputFileType, generate, PythonVersion, LiteralType
+from tempfile import TemporaryDirectory
+from pathlib import Path
+import re
 
 
 def resolve_json_ref(full_dict: dict, input_dict: dict):
@@ -124,9 +128,10 @@ class ModelProperty(BaseModel):
 
 class ModelResponse(BaseModel):
     code: int
+    body_module: str  # body module from datamodel_code_generator
+    body_root_class: str  # root class name of body module containing all nested classes
     example: str = 'No example provided'
     description: str = 'No description provided'
-    body_properties: list[ModelProperty] = Field(default_factory=list)
     header_properties: list[ModelProperty] = Field(default_factory=list)
 
     @property
@@ -145,35 +150,42 @@ class ModelResponse(BaseModel):
                               description=p_dict.get('description')
                               )
             headers_properties.append(m)
-        body_properties = []
         body_schema = d.get('schema', {})
-        if body_schema.get('type') == 'object':
-            for p_name, p_dict in body_schema.get('properties').items():
-                m = ModelProperty(name=p_name,
-                                  type=extract_type(p_dict),
-                                  description=p_dict.get('description'),
-                                  required=p_name in body_schema.get('required', [])
-                                  )
-                body_properties.append(m)
-        elif body_schema.get('type') == 'array':
-            m = ModelProperty(name='items',
-                              type=extract_type(d),
-                              description=d.get('description')
-                              )
-            body_properties.append(m)
-        else:
-            raise TypeError(f"Unknown starting type {body_schema.get('type')}")
+        with TemporaryDirectory() as t:
+            tmp_dir = Path(t)
+            model_file = Path(tmp_dir / 'model.py')
+            generate(json.dumps(body_schema),
+                     input_file_type=InputFileType.JsonSchema,
+                     output=model_file,
+                     disable_timestamp=True,
+                     field_constraints=False,  # raises unenforced field constraints exception
+                     use_annotated=False,
+                     target_python_version=PythonVersion.PY_310,
+                     validation=True,
+                     enum_field_as_literal=LiteralType.All
+                     )
+            body_module = model_file.read_text()
+
+            # remove imports and annotations
+            body_module = re.sub(r'^\s*#.*', '', body_module, flags=re.MULTILINE)
+            body_module = re.sub(r'^from __future__ import annotations.*', '', body_module, flags=re.MULTILINE)
+            body_module = body_module.strip()
+
+            # extract last class name from source file
+            body_module_classes = [c for c in body_module.splitlines() if c.startswith('class') and 'BaseModel' in c]
+            last_class = [c.split(' ')[1].split('(')[0].strip() for c in body_module_classes if c.split(' ')[1].split('(')[0].strip()][-1]
 
         return cls(code=code,
                    example=json.dumps(d.get('examples', {}).get('application/json', {}), indent=2),
                    description=d.get('description'),
                    header_properties=headers_properties,
-                   body_properties=body_properties
+                   body_module=body_module,
+                   body_root_class=last_class
                    )
 
 
 class ModelPath(BaseModel):
-    method: Literal['get', 'post', 'delete']
+    method: Literal['get', 'post', 'delete', 'put', 'patch']
     class_name: str
     path: str
     summary: str = 'No summary provided.'

@@ -1,6 +1,6 @@
 {% set model_names = [] %}
 {% for r in m.responses_success %}
-{{ model_names.append('Success%s_%s'| format(r.code, m.class_name)) or ''}}
+{{ model_names.append('Response%s_%s'| format(r.code, m.class_name)) or ''}}
 {% endfor %}
 
 {% set model_docstring_links = [] %}
@@ -14,46 +14,12 @@ This module was automatically generated from Jinja templates with the codegen to
 You should not directly modify this module but instead modify the template 'codegen/Templates/ESI_Task.py'.
 """
 
-from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
-from EVECelery.tasks.BaseTasks.TaskBase import ModelTaskBaseResponse
-from EVECelery.tasks.BaseTasks.TaskCached import ModelCachedSuccess, ModelCachedException
-from pydantic import BaseModel, Field, validate_arguments
 from typing import Union, Optional
-
-{% for r in m.responses_success -%}
-class SuccessHeaders{{ r.code }}_{{ m.class_name }}(ModelTaskBaseResponse):
-    """
-    Headers for response code {{ r.code }}
-    """
-
-    {% for p in r.header_properties -%}
-    {{ p.pydantic_field }}
-    {% else %}
-    pass
-    {% endfor %}
-
-class Success{{ r.code }}_{{ m.class_name }}(ModelCachedSuccess):
-    """
-    {{ r.description | indent(width=4)}}
-
-    Response for response code {{ r.code }}. This is the response body model that also contains the headers.
-
-    Example responses from ESI:
-
-    .. code-block:: json
-
-        {{ r.example | indent(width=8)}}
-
-    """
-
-    headers: SuccessHeaders{{ r.code }}_{{ m.class_name }} = Field(..., description='The response headers for this request.')
-    {% for p in r.body_properties -%}
-    {{p.pydantic_field}}
-    {% else %}
-    pass
-    {% endfor %}
+from pydantic import validate_arguments
+from EVECelery.tasks.BaseTasks.TaskESI import TaskESI
+{% for r in m.responses_success %}
+from .Models.{{ m.class_name }}_{{ r.code }} import Response{{ r.code }}_{{ m.class_name }}
 {% endfor %}
-
 
 class {{ m.class_name }}(TaskESI):
     """

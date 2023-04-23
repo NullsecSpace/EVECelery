@@ -49,27 +49,49 @@ class GenerateAPI:
 
     def render_templates(self):
         for m in self.template_models.values():
-            t = self.template_env.get_template('ESI_Task.py')
-            m_rendered = t.render(m=m)
-            m_rendered = black.format_str(m_rendered, mode=black.Mode(
+            template_task = self.template_env.get_template('ESI_Task.py')
+            rendered_task_module = template_task.render(m=m)
+            rendered_task_module = black.format_str(rendered_task_module, mode=black.Mode(
                 target_versions={black.TargetVersion.PY310},
                 is_pyi=False,
                 string_normalization=False
             ))
             package = m.package
+
+            rendered_model_modules = {}
+            template_models = self.template_env.get_template('ESI_Models.py')
+            for response_success in m.responses_success:
+                rendered_model = template_models.render(r=response_success, task_name=m.class_name)
+                rendered_model = black.format_str(rendered_model, mode=black.Mode(
+                    target_versions={black.TargetVersion.PY310},
+                    is_pyi=False,
+                    string_normalization=False
+                ))
+                module_name = f'{m.class_name}_{response_success.code}'
+                rendered_model_modules[module_name] = rendered_model
+
             if not isinstance(self.templates_rendered.get(package), dict):
                 self.templates_rendered[package] = {}
             if m.class_name in self.templates_rendered[package]:
-                raise ValueError(f'Package cannot contain duplicated class names. "{m.class_name}" is duplicated')
+                raise ValueError(f'Package cannot contain duplicated module names. "{m.class_name}" is duplicated')
             else:
-                self.templates_rendered[package][m.class_name] = m_rendered
-                self.total_templates_success += 1
+                self.templates_rendered[package][m.class_name] = rendered_task_module
+
+            if not isinstance(self.templates_rendered[package].get('Models'), dict):
+                self.templates_rendered[package]['Models'] = {}
+            for k, v in rendered_model_modules.items():
+                if k in self.templates_rendered[package]['Models']:
+                    raise ValueError(f'Package cannot contain duplicated module names. "{k}" is duplicated')
+                else:
+                    self.templates_rendered[package]['Models'][k] = v
+            self.total_templates_success += 1
 
     def render_task_directory_templates(self):
         for package in list(self.templates_rendered.keys()):
+            module_names_non_models = [k for k, v in self.templates_rendered.get(package, {}).items() if isinstance(v, str)]
             t = self.template_env.get_template('TaskDirectory.py')
             package_task_directory = t.render(package_name=package,
-                                              module_names=self.templates_rendered.get(package, {}).keys(),
+                                              module_names=module_names_non_models,
                                               module_models=self.template_models)
             package_task_directory = black.format_str(package_task_directory, mode=black.Mode(
                 target_versions={black.TargetVersion.PY310},
@@ -105,8 +127,18 @@ class GenerateAPI:
                 with open(f'{package_path}/__init__.py', 'w') as f:
                     f.write('')
                 for module, module_contents in package_contents.items():
-                    with open(f'{package_path}/{module}.py', 'w') as f:
-                        f.write(module_contents)
+                    if isinstance(module_contents, str):
+                        with open(f'{package_path}/{module}.py', 'w') as f:
+                            f.write(module_contents)
+                    elif isinstance(module_contents, dict):
+                        os.mkdir(package_path + '/Models')
+                        with open(f'{package_path}/Models/__init__.py', 'w') as f:
+                            f.write('')
+                        for model_name, model_contents in module_contents.items():
+                            with open(f'{package_path}/Models/{model_name}.py', 'w') as f:
+                                f.write(model_contents)
+                    else:
+                        raise TypeError(f'Unexpected type: {type(module_contents)}')
             elif isinstance(package_contents, str):
                 with open(f'{task_esi_path}/{package}.py', 'w') as f:
                     f.write(package_contents)
