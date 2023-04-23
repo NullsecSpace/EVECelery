@@ -91,6 +91,7 @@ From another Python script you can send tasks to the queues and receive results:
 
 ```python
 from EVECelery import EVECeleryWorker, TaskDirectory
+import json
 
 # only need to make one CeleryWorker in our code to init the tasks and setup connections to RabbitMQ and Redis
 # by not passing connection params to CeleryWorker() the connection info will be read from environmental variables
@@ -102,35 +103,38 @@ c = EVECeleryWorker()
 r = TaskDirectory.ESI.Universe.get_universe_regions_region_id.get_sync(region_id=10000053)
 # r is the response containing data obtained from ESI
 # subsequent calls with the same parameters return results from the cache regardless of requesting client
-print(r.dict())
+print(json.dumps(r.dict(), indent=2, default=str))
 {
-  "pydantic_model": "Success200_get_universe_regions_region_id",
-  "cache_hit": true,
-  "cache_key": "Cache.ESI.Universe.get_universe_regions_region_id.cd252dea2970194b46260124270444f07f4bf449a5fe37ef31f163005fcb50e7",
-  "cache_ttl": 31710,
+  "pydantic_model": "Response200_get_universe_regions_region_id",
+  "cache": {
+    "hit": true,
+    "key": "Cache.ESI.Universe.get_universe_regions_region_id.cd252dea2970194b46260124270444f07f4bf449a5fe37ef31f163005fcb50e7",
+    "ttl": 8940
+  },
   "headers": {
-    "pydantic_model": "SuccessHeaders200_get_universe_regions_region_id",
     "Cache_Control": "public",
     "Content_Language": "en",
     "ETag": null,
-    "Expires": "Mon, 17 Apr 2023 11:05:00 GMT",
-    "Last_Modified": "Sun, 16 Apr 2023 11:01:07 GMT"
+    "Expires": "Sun, 23 Apr 2023 11:05:00 GMT",
+    "Last_Modified": "Sat, 22 Apr 2023 11:01:05 GMT"
   },
-  "constellations": [
-    20000609,
-    20000610,
-    20000611,
-    20000612,
-    20000613,
-    20000614,
-    20000615,
-    20000616,
-    20000617,
-    20000618
-  ],
-  "description": "A natural destination for explorers and adventurers of all kinds, Cobalt Edge ...",
-  "name": "Cobalt Edge",
-  "region_id": 10000053
+  "body": {
+    "constellations": [
+      20000609,
+      20000610,
+      20000611,
+      20000612,
+      20000613,
+      20000614,
+      20000615,
+      20000616,
+      20000617,
+      20000618
+    ],
+    "description": "A natural destination for explorers and adventurers of all kinds, Cobalt Edge...",
+    "name": "Cobalt Edge",
+    "region_id": 10000053
+  }
 }
 ```
 
