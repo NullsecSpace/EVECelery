@@ -1,9 +1,8 @@
 from EVECelery.tasks.BaseTasks.TaskCached import TaskCached
-from EVECelery.exceptions.tasks import CachedException
-from EVECelery.tasks.BaseTasks.TaskCached import ModelCachedSuccess, ModelCachedException
+from EVECelery.tasks.BaseTasks.TaskCached import ModelCachedResponse, ModelCachedException
 
 
-class ModelResponse(ModelCachedSuccess):
+class ModelResponse(ModelCachedResponse):
     result: float
 
 

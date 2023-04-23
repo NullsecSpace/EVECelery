@@ -17,6 +17,7 @@ class ModelBaseWithModelInfo(ModelBaseEVECelery):
 
     This model has a pydantic model attribute that is used to deserialize the response data in a cache system such as Redis.
     """
+    #: The name of the pydantic model class that this model was initialized with.
     pydantic_model: str = Field(default=None,
                                 description='The name of the pydantic model class that this model was initialized with.')
 
