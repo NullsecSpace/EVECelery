@@ -1,10 +1,11 @@
 from typing import Union, Optional
 import hashlib
-from .Models.ModelsCached import ModelCachedResponse, ModelCachedException
+from .Models.ModelsCached import ModelCachedResponse, ModelCachedException, ModelCacheInfo
 from .TaskBase import TaskBase
 from EVECelery.clients.ClientRedis import ClientRedisLocks, ClientRedisCache
 from EVECelery.exceptions.tasks import CachedException
 import redis
+from pydantic import validate_arguments
 
 
 class TaskCached(TaskBase):
@@ -30,6 +31,14 @@ class TaskCached(TaskBase):
         :return: The number of seconds to cache a response
         """
         return 86400
+
+    @classmethod
+    @validate_arguments
+    def reflection_get_model(cls, model_name: str):
+        if model_name == 'ModelCachedException':
+            return ModelCachedException
+        else:
+            return super().reflection_get_model(model_name)
 
     def get_hash(self, **kwargs) -> str:
         """
@@ -98,6 +107,8 @@ class TaskCached(TaskBase):
                 response_pydantic.cache.hit = True
             else:
                 response_pydantic = self._run_get_result(**kwargs)
+                if response_pydantic.cache is None:
+                    response_pydantic.cache = ModelCacheInfo()
                 response_pydantic.cache.hit = False
                 response_pydantic.cache.key = key_cache
                 if response_pydantic.cache.ttl is None:
